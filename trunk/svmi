@@ -1145,6 +1145,7 @@ install_vmware()
 	if [ "$1" == "$AA" ];then
 		install_anyany
 	elif [ "$1" == "$VMP" ];then
+		construct_file_name
 		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ];then
 			echo "${S}Starting $VMP install and setup. When vmware setup asks you this question:"
 			echo "${M}Before running VMware Player for the first time, you need to configure it"
@@ -1155,7 +1156,6 @@ install_vmware()
 			echo "${S}Starting $VMP install and setup now using the new ${C}.bundle${S} file installer...${N}"
 		fi
 		print_hec
-		construct_file_name
 		download_file
 		run_file
 		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ];then
