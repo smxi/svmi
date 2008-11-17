@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.0.0
-####  Date: November 15 2008
+####  version: 2.0.1
+####  Date: November 16 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -17,9 +17,9 @@
 ####  Get the full text of the GPL here:
 ####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 ########################################################################
-####  Script URL: http://techpatterns.com/downloads/distro/svmi
+####  Script URL: http://smxi.org/sv/svmi
 ####  Script SVN: http://code.google.com/p/svmi
-####  Script Documentation: http://techpatterns.com/docs/
+####  Script Documentation: http://smxi.org/docs/
 ####  Script Home Forums: http://techpatterns.com/forums/forum-33.html
 ########################################################################
 #### DEFINE:
@@ -91,7 +91,7 @@ WITHOUT_RECOMMENDS=''
 EAS='/etc/apt/sources.list'
 EDV='/etc/debian_version'
 EMOD='/etc/modules'
-SCRIPT_DOWNLOAD='http://techpatterns.com/downloads/distro/'
+SCRIPT_DOWNLOAD='http://smxi.org/sv/'
 SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
 SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
@@ -170,7 +170,7 @@ case $KERNEL_THIRD in
 		# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update117c.tar.gz
 		# author blog:
 		# http://opensuse-linux-blog.blogspot.com/2008/07/how-to-install-vmware-in-2626-linux.html#links
-		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
+		ANYANY_PREFIX='http://smxi.org/sv/patches/'
 		#ANYANY_Z='.tgz' # note, moving to 'd' patch from 'c'
 		ANYANY_ALT='d'
 		ANYANY_NUMBER=117
@@ -187,7 +187,7 @@ case $KERNEL_THIRD in
 		;;
 	24)
 		# http://blog.creonfx.com/temp/vmware-any-any-update-116.tgz
-		ANYANY_PREFIX='http://techpatterns.com/downloads/distro/patches/'
+		ANYANY_PREFIX='http://smxi.org/sv/patches/'
 		ANYANY_Z='.tgz'
 		ANYANY_ALT='a'
 		ANYANY_NUMBER=115
