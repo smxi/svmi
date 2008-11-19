@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.0.1
-####  Date: November 16 2008
+####  version: 2.0.2
+####  Date: November 19 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -48,7 +48,7 @@
 ####  All functions should follow standard naming, ie, verb adjective noun, get_cpu_data
 ########################################################################
 ####  TESTING FLAGS
-####  smxi supports advanced testing triggers to do various things, using -! <arg>
+####  svmi supports advanced testing triggers to do various things, using -! <arg>
 ####  -! 1 - triggers default B_TESTING_1='true' to trigger some test or other
 ####  -! 2 - triggers default B_TESTING_2='true' to trigger some test or other
 ####  -! 3 - triggers default B_SKIP_FUNCTION='true' to turn off some functions
@@ -1561,6 +1561,19 @@ show_options()
 	echo "   Example: svmi -V 1.5.2 [or] svmi -V 2.0.5"
 	echo "-Z Skips connection test. Use this if $SCRIPT_NAME gives you connection failed error but"
 	echo "   you are sure your connection is fine."
+	if [ "$1" == 'full' ];then
+		echo ''
+		echo "Developer and Testing Options (Advanced):"
+		echo "-! 1 - Sets flag B_TESTING_1='true' to trigger testing condition 1."
+		echo "-! 2 - Sets flag B_TESTING_2='true' to trigger testing condition 2."
+		echo "-! 3 - Sets flag B_SKIP_FUNCTION='true' to turn off some functions."
+		echo "-! 4 - Sets flags B_TESTING_1='true' and B_TESTING_2='true'."
+		echo "-! 5 - Sets flags B_TESTING_1='true' and B_SKIP_FUNCTION='true'."
+		echo "-! 10 - Triggers an update from the primary dev download server."
+		echo "-! 11 - Triggers an update from svn branch one - if present, of course."
+		echo "-! 12 - Triggers an update from svn branch two - if present, of course."
+		echo "-! <http://......> - Triggers an update from whatever server you list."
+	fi
 	echo
 
 	if [ "$1" == 'err' ];then
@@ -1573,7 +1586,7 @@ show_options()
 # args: $1 - "$@"
 get_options()
 {
-	while getopts ABDhj:MpP:RSuUvV:Z!: opt
+	while getopts ABDhHj:MpP:RSuUvV:Z!: opt
 	do
 		case $opt in
 			A) AUTORUN_ANYANY='true'
@@ -1649,6 +1662,8 @@ get_options()
 				START_OPTIONS=$START_OPTIONS' -Z'
 				;;
 			h) show_options
+				;;
+			H)	show_options 'full'
 				;;
 			## debuggers and testing options
 			!)	# test for various supported methods
