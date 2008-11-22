@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.0.2
-####  Date: November 19 2008
+####  version: 2.0.3
+####  Date: November 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -126,6 +126,7 @@ FILE_URL=''
 # http://download3.vmware.com/software/wkst/VMware-workstation-5.5.0-18463.tar.gz
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.i386.tar.gz
 # http://download3.vmware.com/software/vmplayer/VMware-player-2.0.2-59824.x86_64.tar.gz
+# http://download3.vmware.com/software/vmplayer/VMware-Player-2.5.1-126130.i386.bundle
 # VMware-player-2.0.2-59824 VMware-workstation-5.5.0-18463 2.0.4-93057
 VMPLAYER_PREFIX='http://download3.vmware.com/software/vmplayer/'
 # Two version will be supported: previous major, latest, and current major
@@ -133,8 +134,9 @@ VMPLAYER_NUMBER_PREVIOUS='2.0.5'
 VMPLAYER_BUILD_PREVIOUS='109488'
 VMWARE_NAME_PREVIOUS='VMware-player'
 # current version
-VMPLAYER_NUMBER='2.5.0'
-VMPLAYER_BUILD='118166'
+# 2.5.0 118166;
+VMPLAYER_NUMBER='2.5.1'
+VMPLAYER_BUILD='126130'
 VMWARE_NAME='VMware-Player'
 
 VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
@@ -313,15 +315,15 @@ set_test_data()
 # 		# this is required for testing to make sure we always are starting with true
 # 		# latest script versions
 # 		username=$( getent passwd 1000|cut -d \: -f1 )
-# 		SCRIPT_HOME="/home/$username/bin/scripts/sidux/"
+# 		SCRIPT_HOME="/home/$username/bin/scripts/svmi/dev/"
 # 		LOG_FILE="$SCRIPT_HOME"svmi.log
 # 		cd $SCRIPT_HOME
+# 		VMWARE_INSTALL_PATH="$SCRIPT_HOME"
+# 		VBOX_INSTALL_PATH="$SCRIPT_HOME"
 # 		rm -f svmi.log
-# 		VMWARE_INSTALL_PATH="$SCRIPT_HOME"src/
-# 		VBOX_INSTALL_PATH="$SCRIPT_HOME"src/
 # 		SYSTEM_BASE='testing'
 # 		KERNEL_THIRD=25
-		:
+:
 	fi
 }
 
