@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.0.3
-####  Date: November 22 2008
+####  version: 2.1.0
+####  Date: November 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -637,26 +637,39 @@ install_package()
 	eval $LOGUE
 }
 
+# args: $1 - package list to remove; $2 - remove-all/loop
 remove_package()
 {
 	eval $LOGUS
 	local response='' package=''
 
 	if [ -n "$1" ];then
-		echo $MLINE
-		echo "${M}You will need to remove the following package(s): ${C}$1"
-		echo "${M}in order to proceed with your ${C}$2${M} driver install${N}"
-		echo $MLINE
-		for package in $1
-		do
-			if [ -n "$( dpkg -l | grep $package )" ];then
-				echo "${S}Removing ${C}$package${S}...${N}"
-				$APT_TYPE purge $package || error_handler 196 "$package"
-			else
-				echo "${S}The package ${C}$package${S} is not installed, continuing...${N}"
-			fi
-		done
-		echo "${S}Package(s) removed successfully, continuing with driver install.${N}"
+		case $2 in
+			# this remove list is already calculated so no need to check it again
+			remove-all)
+				echo $MLINE
+				echo "${M}Removing the following package(s): "
+				echo "${C}$1"
+				echo $MLINE
+				$APT_TYPE purge $1 || error_handler 196 "$1"
+				;;
+			loop)
+				echo $MLINE
+				echo "${M}You will need to remove the following package(s): ${C}$1"
+				echo "${M}in order to proceed with your ${C}$2${M} driver install${N}"
+				echo $MLINE
+				for package in $1
+				do
+					if [ -n "$( dpkg -l | grep $package )" ];then
+						echo "${S}Removing ${C}$package${S}...${N}"
+						$APT_TYPE purge $package || error_handler 196 "$package"
+					else
+						echo "${S}The package ${C}$package${S} is not installed, continuing...${N}"
+					fi
+				done
+				echo "${S}Package(s) removed successfully, continuing with driver install.${N}"
+				;;
+		esac
 	fi
 	eval $LOGUE
 }
@@ -955,13 +968,15 @@ vm_main_selector()
 	echo "    for your currently installed virtualbox-ose: ${C}$VBOX_INSTALLED_VERSION"
 
 	echo $LINE
-	echo "${C}10${S} - ${C}$quitContinue${S}"
+	echo "${C}10${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
+	echo "${C}11${S} - ${C}uninstall-vmware${S} Removes all currently installed ${C}Vmware${S} components."
+	echo "${C}12${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons $quitContinue"
+	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox uninstall-vmware $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1001,6 +1016,12 @@ vm_main_selector()
 				install_vbox_addons
 				repeat='true'
 				;;
+			uninstall-vbox)
+				uninstall_vm_app 'vbox'
+				;;
+			uninstall-vmware)
+				uninstall_vm_app 'vmplayer'
+				;;
 			$quitContinue)
 				echo "${S}Thanks for checking out the Virtual Machine Installer.${N}"
 				exit 0
@@ -1019,6 +1040,77 @@ vm_main_selector()
 	eval $LOGPE
 }
 
+# args: $1 - type vbox/vmplayer
+uninstall_vm_app()
+{
+	eval $LOGUS
+	local returnValue=0 repeat='' yesOpt='' yesText=''
+	local vmPlayerRemove='vmware-uninstall' vmTest=''
+
+	case $1 in
+		vbox)
+			yesOpt='yes-remove-virtualbox'
+			yesText='VirtualBox'
+			vmTest=$( dpkg -l | awk '{print $2}' | grep -i virtualbox )
+			;;
+		vmplayer)
+			yesOpt='yes-remove-vmware'
+			yesText='Vmware'
+			vmTest=$( which vmware-uninstall )
+			;;
+	esac
+	log_function_data "Remover: $vmTest"
+	if [ -n "$vmTest" ];then
+		echo $MLINE
+		echo "$SPACER${M}Virtual Machine Remover"
+		echo $MLINE
+		echo "${S}If you select ${C}1${S}, you will remove the virtual machine software, but the"
+		echo "machine images, if any, will remain. If you decide to reinstall later, you can reuse them."
+		echo $LINE
+
+		echo "${C}1 - $yesOpt${S} - Remove ${C}$yesText${S}. This removes all components of ${C}$yesText${S} completely."
+		echo "${C}2 - no-return-to-menu${S} - Don't uninstall ${C}$yesText${S} after all."
+		echo $LINE
+		echo -e $SLE
+		echo $LINE
+		options="$yesOpt no-return-to-menu"
+		select opt in $options
+		do
+			log_function_data "opt selected: $opt"
+			case $opt in
+				$yesOpt)
+					case $1 in
+						vbox)
+							remove_package "$vmTest" 'remove-all'
+							;;
+						vmplayer)
+							exec $vmTest
+							;;
+					esac
+					returnValue=$?
+					;;
+				no-return-to-menu)
+					returnValue=1
+					;;
+				*)
+					print_error opt
+					repeat='true'
+					;;
+			esac
+			break
+		done
+
+		log_function_data "Return Value: $returnValue"
+
+		eval $LOGUE
+		if [ "$repeat" == 'true' ];then
+			uninstall_vm_app "$1"
+		fi
+	else
+		echo "${M}You do not appear to have any ${C}$yesText${M} components installed.${N}"
+		print_hec
+	fi
+}
 ### -------------------------------------------------------------------
 ### vmware functions
 ### -------------------------------------------------------------------
@@ -1254,7 +1346,7 @@ install_vbox()
 	log_function_data "To remove: $toRemove"
 	log_function_data "To install: $toInstall"
 
-	remove_package "$toRemove"
+	remove_package "$toRemove" 'loop'
 	install_package "$toInstall"
 
 	if [ "$1" == 'non-ose' ];then
