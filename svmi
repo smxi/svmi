@@ -248,12 +248,12 @@ set_test_data()
 	if [ "$B_TESTING_1" == 'true' ];then # set testing directories etc
 # 		# this is required for testing to make sure we always are starting with true
 # 		# latest script versions
-		username=$( getent passwd 1000|cut -d \: -f1 )
-		SCRIPT_HOME="/home/$username/bin/scripts/svmi/dev/"
-		LOG_FILE="$SCRIPT_HOME"svmi.log
-		cd $SCRIPT_HOME
+# 		username=$( getent passwd 1000|cut -d \: -f1 )
+# 		SCRIPT_HOME="/home/$username/bin/scripts/svmi/dev/"
+# 		LOG_FILE="$SCRIPT_HOME"svmi.log
+# 		cd $SCRIPT_HOME
 # 		VMWARE_INSTALL_PATH="$SCRIPT_HOME"
-		VBOX_INSTALL_PATH="$SCRIPT_HOME"
+# 		VBOX_INSTALL_PATH="$SCRIPT_HOME"
 # 		rm -f svmi.log
 # 		SYSTEM_BASE='testing'
 # 		KERNEL_THIRD=25
