@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.1.4
-####  Date: December 17 2008
+####  version: 2.1.5
+####  Date: December 22 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -448,15 +448,17 @@ error_handler()
 #print_information
 basic_startup_tests()
 {
-	local nonDebianPattern='(sidux|opera|debian-multimedia|skype|swiftfox|virtualbox)'
+	local nonDebianPattern='(sidux|opera|debian-multimedia|mepis|skype|swiftfox|virtualbox)'
+
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
+	local isLenny=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(lenny)' )
 	local isLennyStable=$( grep -is '^5.' $EDV )
 	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
 	local isSqueezeSid=$( egrep -is '^(squeeze/sid|6\.)' $EDV )
 
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing)' )
+	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing|lenny)' )
 	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(sid|unstable)' )
 
 	### basic system requirements for this script to run, first so user doesn't
