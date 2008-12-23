@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.1.5
-####  Date: December 22 2008
+####  version: 2.1.6
+####  Date: December 23 2008
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2008
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -452,10 +452,8 @@ basic_startup_tests()
 
 	# these tests will be improved over time, but are ok for now
 	local isEtch=$( grep -is '^4.' $EDV )
-	local isLenny=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(lenny)' )
-	local isLennyStable=$( grep -is '^5.' $EDV )
-	local isLennyTesting=$( grep -is '^lenny/sid' $EDV )
-	local isSqueezeSid=$( egrep -is '^(squeeze/sid|6\.)' $EDV )
+	local isLenny=$( grep -is '^5.' $EDV )
+	local isSqueeze=$( egrep -is '^(squeeze|6\.)' $EDV )
 
 	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(stable|etch)' )
 	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$nonDebianPattern" | egrep -icw '(squeeze|testing|lenny)' )
@@ -494,7 +492,7 @@ basic_startup_tests()
 		else
 			SYSTEM_BASE='stable'
 		fi
-	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLennyTesting" -o -n "$isSqueezeSid" -o "$isTesting" -gt 0 ];then
+	elif [ "$isUnstable" -eq 0 ] && [ -n "$isLenny" -o -n "$isSqueeze" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 	else
 		SYSTEM_BASE='sid'
