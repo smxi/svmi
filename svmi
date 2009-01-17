@@ -2,20 +2,20 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.1.6
-####  Date: December 23 2008
+####  version: 2.1.7
+####  Date: January 17 2009
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2008
+####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
-####  Foundation; either version 2 of the License, or (at your option) any later version.
+####  Foundation; either version 3 of the License, or (at your option) any later version.
 ####
 ####  This program is distributed in the hope that it will be useful, but WITHOUT
 ####  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 ####  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 ####
 ####  Get the full text of the GPL here:
-####  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+####  http://www.gnu.org/licenses/gpl.html
 ########################################################################
 ####  Script URL: http://smxi.org/sv/svmi
 ####  Script SVN: http://code.google.com/p/svmi
@@ -1049,6 +1049,7 @@ uninstall_vm_app()
 	eval $LOGUS
 	local returnValue=0 repeat='' yesOpt='' yesText=''
 	local vmPlayerRemove='vmware-uninstall' vmTest=''
+	local evm='/etc/vmware'
 
 	case $1 in
 		vbox)
@@ -1088,6 +1089,15 @@ uninstall_vm_app()
 							;;
 						vmplayer)
 							exec $vmTest
+							# this is required to avoid an annoying bug with corrupted
+							# vmware database on reinstall or upgrade. I'm going to leave
+							# this for now as only uninstall, but it might make sense to also
+							# do this for every upgrade, I'll see how the bugs go.
+							# http://techpatterns.com/forums/about1188.html
+							if [ -d $evm ];then
+								rm -rf $evm
+								echo "${S}Removed $evm to avoid future issues.${N}"
+							fi
 							;;
 					esac
 					returnValue=$?
