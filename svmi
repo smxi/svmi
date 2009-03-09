@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.1.12
-####  Date: March 6 2009
+####  version: 2.1.13
+####  Date: March 9 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -530,11 +530,11 @@ check_install_tools()
 	local gccVersion=$( egrep -io 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | egrep -o '[4-6]\.[0-9]{1,2}' )
 	local ubgv="/usr/bin/gcc-$gccVersion"
 
-	if [ ! -x /usr/bin/module-assistant ];then
-		install_package module-assistant
+	if [ -z "$( check_package_status 'module-assistant' 'i' )" ];then
+		install_package 'module-assistant'
 	fi
-	if [ ! -d /usr/share/build-essential ];then
-		install_package build-essential
+	if [ -z "$( check_package_status 'build-essential' 'i' )" ];then
+		install_package 'build-essential'
 	fi
 
 	if [ -x "$ubgv" ];then
@@ -621,6 +621,27 @@ get_set_prefs()
 			fi
 			;;
 	esac
+	eval $LOGUE
+}
+
+# Returns null if package is not available in user system apt.
+# args: $1 - package to test; $2 c/i
+check_package_status()
+{
+	eval $LOGUS
+	local packageVersion='' statusType=''
+
+	case $2 in
+		c)	statusType='Candidate:'
+			;;
+		i)	statusType='Installed:'
+			;;
+	esac
+
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+
+	echo $packageVersion
+	log_function_data "Package Version: $packageVersion"
 	eval $LOGUE
 }
 
@@ -1272,6 +1293,10 @@ install_vmware()
 			echo "${S}Starting $VMP install and setup now using the new ${C}.bundle${S} file installer...${N}"
 		fi
 		print_hec
+		# this fixes a possible bug in running vmplayer
+		if [ -z "$( check_package_status 'shared-mime-info' 'i' )" ];then
+			install_package 'shared-mime-info'
+		fi
 		download_file
 		run_file
 		if [ -z "$( grep '.bundle$' <<< $FILE_NAME )" ];then
@@ -1304,7 +1329,7 @@ install_anyany()
 create_qemu_image()
 {
 	eval $LOGUS
-	local qemuExists=$( dpkg -l | grep 'qemu'  )
+	local qemuExists=$( check_package_status 'qemu' 'i' )
 
 	echo $LINE
 	if [ -z "$qemuExists" ];then
