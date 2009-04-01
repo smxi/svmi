@@ -1389,7 +1389,7 @@ build_vmware_module()
 	if [ "$errorReturn" -eq 0 ];then
 		echo "${S}Vmplayer kernel module built successfully. All done!${N}"
 	else
-		echo "${W}ERROR: ${C}$?${W} occurred in the Vmplayer kernel module build!${N}"
+		echo "${W}ERROR: ${C}$errorReturn${W} occurred in the Vmplayer kernel module build!${N}"
 	fi
 	eval $LOGUE
 }
