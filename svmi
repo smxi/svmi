@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.2.0
-####  Date: March 31 2009
+####  version: 2.3.0
+####  Date: April 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -247,6 +247,7 @@ fi
 # args: $1 vbox/vmplayer
 apply_fixes_post_install()
 {
+	eval $LOGUS
 	local i='' patchName='' patchUrl="$SCRIPT_DOWNLOAD/patches" dirData=''
 	
 	case $1 in
@@ -254,6 +255,7 @@ apply_fixes_post_install()
 			:
 			;;
 		vmplayer)
+			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_THIRD $KERNEL_THIRD"
 			case $KERNEL_THIRD in
 				29)
 					case $VMPLAYER_NUMBER in
@@ -278,7 +280,7 @@ apply_fixes_post_install()
 								done
 								rm -f *.tar
 								echo "${S}Applying patch now...${N}"
-								patch -p1 -i $VMWARE_INSTALL_PATH/$patchName
+								patch -p1 -i $VMWARE_INSTALL_PATH/$patchName 2>> $LOG_FILE 2>&1
 								echo "${S}Running post patch processes...${N}"
 								for i in mblock mci mmon mnet mppuser sock
 								do 
@@ -297,6 +299,7 @@ apply_fixes_post_install()
 			esac
 			;;
 	esac
+	eval $LOGUE
 }
 
 # only for debugging purposes
@@ -1364,10 +1367,31 @@ install_vmware()
 			run_file
 		fi
 		apply_fixes_post_install 'vmplayer'
+		if [ -n "$( grep '.bundle$' <<< $FILE_NAME )" ];then
+			build_vmware_module
+		fi
 	fi
 
 	eval $LOGPE
 	print_hec
+}
+
+build_vmware_module()
+{
+	eval $LOGUS
+	local errorReturn=''
+	
+	echo $LINE
+	echo "${S}Building Vmware module for your ${C}$CURRENT_KERNEL${S} kernel now...${N}"
+	vmware-modconfig --console --install-all 2>> $LOG_FILE 2>&1
+	errorReturn=$?
+	log_function_data "vmware-modconfig returned: $errorReturn"
+	if [ "$errorReturn" -eq 0 ];then
+		echo "${S}Vmplayer kernel module built successfully. All done!${N}"
+	else
+		echo "${W}ERROR: ${C}$?${W} occurred in the Vmplayer kernel module build!${N}"
+	fi
+	eval $LOGUE
 }
 
 install_anyany()
