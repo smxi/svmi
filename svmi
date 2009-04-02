@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.0
+####  version: 2.3.1
 ####  Date: April 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -264,7 +264,7 @@ apply_fixes_post_install()
 							# patch src: http://communities.vmware.com//message/1213099
 							# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
 							echo $LINE
-							patchName='vmware-modules-2.6.29-2.5.1.patch'
+							patchName='vmware-modules-2.6.29-2.5.1-2.patch'
 							patchUrl="$patchUrl/$patchName"
 							dirData='/usr/lib/vmware/modules/source/'
 							echo "${S}Retrieving patch for $VMPLAYER_NUMBER post install now...${N}"
