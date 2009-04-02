@@ -249,6 +249,7 @@ apply_fixes_post_install()
 {
 	eval $LOGUS
 	local i='' patchName='' patchUrl="$SCRIPT_DOWNLOAD/patches" dirData=''
+	local testVersion=1
 	
 	case $1 in
 		vbox)
@@ -258,8 +259,11 @@ apply_fixes_post_install()
 			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_THIRD $KERNEL_THIRD"
 			case $KERNEL_THIRD in
 				29)
+					if [ "$B_TESTING_1" == 'true' ];then
+						testVersion='1-2'
+					fi
 					case $VMPLAYER_NUMBER in
-						2.5.1)
+						2.5.[$testVersion])
 							# patch logic: http://communities.vmware.com/thread/192355
 							# patch src: http://communities.vmware.com//message/1213099
 							# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
