@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.2
+####  version: 2.3.3
 ####  Date: April 2 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -135,8 +135,8 @@ VMPLAYER_BUILD_PREVIOUS='109488'
 VMWARE_NAME_PREVIOUS='VMware-player'
 # current version
 # 2.5.0 118166;2.5.1 126130;
-VMPLAYER_NUMBER='2.5.2'
-VMPLAYER_BUILD='156735'
+VMPLAYER_NUMBER='2.5.1'
+VMPLAYER_BUILD='126130'
 VMWARE_NAME='VMware-Player'
 
 VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
@@ -248,8 +248,7 @@ fi
 apply_fixes_post_install()
 {
 	eval $LOGUS
-	local i='' patchName='' patchUrl="$SCRIPT_DOWNLOAD/patches" dirData=''
-	local testVersion=1
+	local modulePatch=''
 	
 	case $1 in
 		vbox)
@@ -259,44 +258,17 @@ apply_fixes_post_install()
 			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_THIRD $KERNEL_THIRD"
 			case $KERNEL_THIRD in
 				29)
-					if [ "$B_TESTING_1" == 'true' ];then
-						testVersion='1-2'
-					fi
 					case $VMPLAYER_NUMBER in
-						2.5.[$testVersion])
-							# patch logic: http://communities.vmware.com/thread/192355
-							# patch src: http://communities.vmware.com//message/1213099
-							# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
-							echo $LINE
-							patchName='vmware-modules-2.6.29-2.5.1-2.patch'
-							patchUrl="$patchUrl/$patchName"
-							dirData='/usr/lib/vmware/modules/source/'
-							echo "${S}Retrieving patch for $VMPLAYER_NUMBER post install now...${N}"
-							wget -O $VMWARE_INSTALL_PATH/$patchName $patchUrl || error_handler 189
-							echo "${S}Preparing system for patching now...${N}"
-							if [ -d $dirData ];then
-								cd $dirData
-								mkdir orig
-								cp -f *.tar orig/
-								for i in $( ls *.tar )
-								do 
-									tar -xf $i
-								done
-								rm -f *.tar
-								echo "${S}Applying patch now...${N}"
-								patch -p1 -i $VMWARE_INSTALL_PATH/$patchName 2>> $LOG_FILE 2>&1
-								echo "${S}Running post patch processes...${N}"
-								for i in mblock mci mmon mnet mppuser sock
-								do 
-									tar -cf v$i.tar v$i-only
-								done
-								rm -rf *-only
-								cd $SCRIPT_HOME # make sure to return to default
-								echo "${S}All done with patching operation, hope it works for you!${N}"
-							else
-								echo "${W}NO $dirData found, cannot proceed!!${N}"
-								print_hec
-							fi
+						# patch logic: http://communities.vmware.com/thread/192355
+						# patch src: http://communities.vmware.com//message/1213099
+						# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
+						2.5.1)
+							modulePatch='vmware-modules-2.6.29-2.5.1-2.patch'
+							vmplayer_quick_fix "$modulePatch"
+							;;
+						2.5.2)
+							modulePatch='vmware-modules-2.6.29-2.5.1-2.patch'
+							vmplayer_quick_fix "$modulePatch"
 							;;
 					esac
 					;;
@@ -304,6 +276,42 @@ apply_fixes_post_install()
 			;;
 	esac
 	eval $LOGUE
+}
+
+# args: $1 - which patch to run
+vmplayer_quick_fix()
+{
+	local i='' patchName=$1 patchUrl="$SCRIPT_DOWNLOAD/patches"
+	local dirData='/usr/lib/vmware/modules/source/'
+	patchUrl="$patchUrl/$patchName"
+	
+	echo $LINE
+	echo "${S}Retrieving patch for $VMPLAYER_NUMBER post install now...${N}"
+	wget -O $VMWARE_INSTALL_PATH/$patchName $patchUrl || error_handler 189
+	echo "${S}Preparing system for patching now...${N}"
+	if [ -d $dirData ];then
+		cd $dirData
+		mkdir orig
+		cp -f *.tar orig/
+		for i in $( ls *.tar )
+		do 
+			tar -xf $i
+		done
+		rm -f *.tar
+		echo "${S}Applying patch now...${N}"
+		patch -p1 -i $VMWARE_INSTALL_PATH/$patchName 2>> $LOG_FILE 2>&1
+		echo "${S}Running post patch processes...${N}"
+		for i in mblock mci mmon mnet mppuser sock
+		do 
+			tar -cf v$i.tar v$i-only
+		done
+		rm -rf *-only
+		cd $SCRIPT_HOME # make sure to return to default
+		echo "${S}All done with patching operation, hope it works for you!${N}"
+	else
+		echo "${W}NO $dirData found, cannot proceed!!${N}"
+		print_hec
+	fi
 }
 
 # only for debugging purposes
@@ -323,6 +331,16 @@ set_test_data()
 # 		SYSTEM_BASE='testing'
 # 		KERNEL_THIRD=25
 :
+	fi
+}
+
+# temp function to set alternate versions
+set_testing_version()
+{
+	if [ "$B_TESTING_2" == 'true' ];then
+		VMPLAYER_NUMBER='2.5.2'
+		VMPLAYER_BUILD='156735'
+		VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
 	fi
 }
 
@@ -1960,6 +1978,7 @@ if [ "$SKIP_RESTART" != 'true' -a "$SM_INSTALL" != 'true' -a "$B_SKIP_FUNCTION" 
 	check_update_script $SCRIPT_NAME "$SCRIPT_DOWNLOAD" 'default server'
 fi
 set_test_data # this will set other test data for debugging
+set_testing_version # to test alternate patches/versions for boolean tests
 
 create_log
 # will run non interactive and set the AUTO_UPDATE flag
