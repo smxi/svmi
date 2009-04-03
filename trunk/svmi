@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.4
+####  version: 2.3.5
 ####  Date: April 3 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1168,6 +1168,7 @@ uninstall_vm_app()
 	local returnValue=0 repeat='' yesOpt='' yesText=''
 	local vmPlayerRemove='vmware-uninstall' vmTest=''
 	local evm='/etc/vmware'
+	local ulv='/usr/lib/vmware'
 
 	case $1 in
 		vbox)
@@ -1215,6 +1216,10 @@ uninstall_vm_app()
 							if [ -d $evm ];then
 								rm -rf $evm
 								echo "${S}Removed $evm to avoid future issues.${N}"
+							fi
+							if [ -d $ulv ];then
+								rm -rf $ulv
+								echo "${S}Removed $ulv to avoid future issues.${N}"
 							fi
 							;;
 					esac
