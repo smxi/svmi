@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.3
-####  Date: April 2 2009
+####  version: 2.3.4
+####  Date: April 3 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1058,46 +1058,51 @@ vm_main_selector()
 	echo "${S}Vmware player version to install: ${C}$VMPLAYER_NUMBER${S}"
 	echo "any-any patch version (only for old vmware installs): ${C}$ANYANY_NUMBER$ANYANY_ALT"
 	echo "${C}1${S} - ${C}install-vmware${S} Downloads, installs, and runs vmware player (+ any-any patch if needed)."
-	echo "${C}2${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required (legacy)."
-	echo "${C}3${S} - ${C}install-qemu${S} Installs qemu if required. ${M}NEW: great site to make your"
+	echo "${C}2${S} - ${C}build-vmplayer-module${S} Rebuilds vmplayer kernel module. Requires vmplayer v. 2.5.x or greater."
+	echo "${C}3${S} - ${C}run-anyany${S} Runs any-any, downloads and installs if required (legacy)."
+	echo "${C}4${S} - ${C}install-qemu${S} Installs qemu if required. ${M}NEW: great site to make your"
 	echo "   vmdk/vmx files, super easy, make a note of it. Highly recommended: ${C}www.easyvmx.com"
 	echo $LINE
 	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
 
-	echo "${C}4${S} - ${C}install-vbox-ose${S} Installs virtualbox-ose. If you need to update modules after installing,"
+	echo "${C}5${S} - ${C}install-vbox-ose${S} Installs virtualbox-ose. If you need to update modules after installing,"
 	echo "    please run ${C}build-vbox-module-ose${S} as well."
-	echo "${C}5${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules,"
+	echo "${C}6${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules,"
 	echo "    adds module to $EMOD if required."
 	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
 
 	echo $LINE
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
-	echo "${C}6${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
+	echo "${C}7${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
 	echo "    Module is built automatically."
-	echo "${C}7${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
+	echo "${C}8${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
-	echo "${C}8${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
+	echo "${C}9${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
 	echo $LINE
-	echo "${C}9${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "${C}10${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
 	echo "    for your currently installed virtualbox-ose: ${C}$VBOX_INSTALLED_VERSION"
 
 	echo $LINE
-	echo "${C}10${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
-	echo "${C}11${S} - ${C}uninstall-vmware${S} Removes all currently installed ${C}Vmware${S} components."
-	echo "${C}12${S} - ${C}$quitContinue${S}"
+	echo "${C}11${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
+	echo "${C}12${S} - ${C}uninstall-vmware${S} Removes all currently installed ${C}Vmware${S} components."
+	echo "${C}13${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vmware run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox uninstall-vmware $quitContinue"
+	options="install-vmware build-vmplayer-module run-anyany make-qemu-image install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox uninstall-vmware $quitContinue"
 	select opt in $options
 	do
 		case $opt in
 			install-vmware)
 				install_vmware $VMP
+				repeat='true'
+				;;
+			build-vmplayer-module)
+				build_vmware_module
 				repeat='true'
 				;;
 			run-anyany)
@@ -1401,17 +1406,26 @@ install_vmware()
 build_vmware_module()
 {
 	eval $LOGUS
-	local errorReturn=''
+	local errorReturn='' vmMod='vmware-modconfig'
+	local vmModConf=$( which $vmMod )
 	
-	echo $LINE
-	echo "${S}Building Vmware module for your ${C}$CURRENT_KERNEL${S} kernel now...${N}"
-	vmware-modconfig --console --install-all 2>> $LOG_FILE 2>&1
-	errorReturn=$?
-	log_function_data "vmware-modconfig returned: $errorReturn"
-	if [ "$errorReturn" -eq 0 ];then
-		echo "${S}Vmplayer kernel module built successfully. All done!${N}"
+	if [ -n "$vmModConf" -a -x "$vmModConf" ];then
+		echo $LINE
+		echo "${S}Building Vmware module for your ${C}$CURRENT_KERNEL${S} kernel now...${N}"
+		vmware-modconfig --console --install-all 
+		errorReturn=$?
+		log_function_data "vmware-modconfig returned: $errorReturn"
+		if [ "$errorReturn" -eq 0 ];then
+			echo "${S}Vmplayer kernel module built successfully. All done!${N}"
+		else
+			echo "${W}ERROR: ${C}$errorReturn${W} occurred in the Vmplayer kernel module build!${N}"
+		fi
 	else
-		echo "${W}ERROR: ${C}$errorReturn${W} occurred in the Vmplayer kernel module build!${N}"
+		echo $WLINE
+		echo "${W}You do not have the required vmplayer tool: ${C}$vmMod"
+		echo "${S}Unable to build your kernel module. You probably are using vmplayer 2.0.x or haven't"
+		echo "installed vmplayer. Please correct this issue.${N}"
+		print_hec
 	fi
 	eval $LOGUE
 }
