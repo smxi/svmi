@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.5
+####  version: 2.3.6
 ####  Date: April 3 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1139,9 +1139,11 @@ vm_main_selector()
 				;;
 			uninstall-vbox)
 				uninstall_vm_app 'vbox'
+				repeat='true'
 				;;
 			uninstall-vmware)
 				uninstall_vm_app 'vmplayer'
+				repeat='true'
 				;;
 			$quitContinue)
 				echo "${S}Thanks for checking out the Virtual Machine Installer.${N}"
