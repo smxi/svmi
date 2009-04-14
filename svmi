@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.9
-####  Date: April 8 2009
+####  version: 2.3.10
+####  Date: April 14 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -809,7 +809,7 @@ test_package_available()
 check_update_script()
 {
 	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
-	local isGood='' uArgs='' downloadUrl=$2 extraText=''
+	local isGood='' downloadUrl=$2 extraText='' uArgs='up' ua="-U s-tools/$SCRIPT_NAME"
 
 	if [ -n "$( egrep '(dev|svn|alt)' <<< $3 )" ];then
 		extraText="${C}$3:\n$2${S}"
@@ -825,11 +825,12 @@ check_update_script()
 
 	# if newer version, download / replace lib file
 	if [ "$1" == "$SCRIPT_NAME" ];then
-		if [ "$FORCE_UPDATE" != 'true' -a "$4" != 'repeat' -a -n "$( grep 'echpat' <<< $2 )" ];then
-			uArgs='?u'
+		if [ "$FORCE_UPDATE" == 'true' -o "$4" == 'repeat' ];then
+			uArgs='ufr'
 		fi
+		$ua="$ua.$uArgs"
 		echo -e "${S}Updating ${C}$SCRIPT_NAME${S} now using the $extraText${N}"
-		wget -q -O$fileNameTemp $downloadUrl$1$uArgs || error_handler 198 $2$1
+		wget $ua -q -O$fileNameTemp $downloadUrl$1$uArgs || error_handler 198 $2$1
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
