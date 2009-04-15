@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.10
-####  Date: April 14 2009
+####  version: 2.3.11
+####  Date: April 15 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -830,7 +830,7 @@ check_update_script()
 		fi
 		$ua="$ua.$uArgs"
 		echo -e "${S}Updating ${C}$SCRIPT_NAME${S} now using the $extraText${N}"
-		wget $ua -q -O$fileNameTemp $downloadUrl$1$uArgs || error_handler 198 $2$1
+		wget $ua -q -O$fileNameTemp $downloadUrl$1 || error_handler 198 $2$1
 		# all smxi files have this string as last line, so if it's there, the file should usually
 		# run fine, except for weird fringe cases where the ascii file is corrupted partially
 		isGood=$( grep '##\*\*EOF\*\*##' $fileNameTemp )
