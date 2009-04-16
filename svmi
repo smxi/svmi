@@ -286,7 +286,7 @@ vmplayer_quick_fix()
 	local i='' patchName=$1 patchUrl="$SCRIPT_DOWNLOAD/patches"
 	local dirData='/usr/lib/vmware/modules/source/'
 	local ua="-U s-tools/$patchName"
-	patchUrl="$patchUrl/$patchName"
+	patchUrl="$patchUrl/sv-patches.$patchName"
 	
 	echo $LINE
 	echo "${S}Retrieving patch for $VMPLAYER_NUMBER post install now...${N}"
