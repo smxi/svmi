@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.14
+####  version: 2.3.15
 ####  Date: April 16 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1500,15 +1500,12 @@ install_vbox()
 	local vboxOSE="virtualbox-ose virtualbox-ose-source"
 	local vboxGeneral=$( dpkg -l | cut -d ' ' -f 3 | grep 'virtualbox' )
 	local vboxBad='virtualbox virtualbox-source'
+	local vboxOseVersion=''
 	# default to ose install
 	local toInstall="$vboxOSE" toRemove="$vboxBad $vboxGeneral"
+	
 	if [ -n "$( test_package_available 'virtualbox-2.0-ose' )" ];then
 		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
-	fi
-	if [ "$1" == 'ose' -a -n "$( grep -Ei '^(2\.[2-9]|[3-4])' <<< $VBOX_VERSION )" ];then
-		if [ -n "$( check_package_status 'virtualbox-ose-qt' 'c' )" -a -z "$( check_package_status 'virtualbox-ose-qt' 'i' )" ];then
-			toInstall="$vboxOSE virtualbox-ose-qt"
-		fi
 	fi
 
 	if [ "$1" == 'non-ose' ];then
@@ -1532,10 +1529,24 @@ install_vbox()
 		remove_package "$toRemove" 'loop'
 		install_package "$toInstall"
 	fi
-
-	if [ "$1" == 'non-ose' ];then
-		install_vbox_non_ose "$2"
-	fi
+	
+	
+	case $1 in
+		# cram in the qt stuff that's required for display if missing, 
+		# or use vboxgtk but that requires more testing.
+		ose)
+			# test after update not before
+			vboxOseVersion=$( check_package_status 'virtualbox-ose' 'i' | cut -d '.' -f 1-2 )
+			if [ -n "$( grep -Ei '^(2\.[2-9]|[3-4])' <<< $vboxOseVersion )" ];then
+				if [ -n "$( check_package_status 'virtualbox-ose-qt' 'c' )" -a -z "$( check_package_status 'virtualbox-ose-qt' 'i' )" ];then
+					install_package "virtualbox-ose-qt"
+				fi
+			fi
+			;;
+		non-ose)
+			install_vbox_non_ose "$2"
+			;;
+	esac
 
 	add_vbox_user
 
