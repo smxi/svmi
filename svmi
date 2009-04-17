@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.13
-####  Date: April 15 2009
+####  version: 2.3.14
+####  Date: April 16 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1504,6 +1504,11 @@ install_vbox()
 	local toInstall="$vboxOSE" toRemove="$vboxBad $vboxGeneral"
 	if [ -n "$( test_package_available 'virtualbox-2.0-ose' )" ];then
 		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
+	fi
+	if [ "$1" == 'ose' -a -n "$( grep -Ei '^(2\.[2-9]|[3-4])' <<< $VBOX_VERSION )" ];then
+		if [ -z "$( check_package_status 'virtualbox-ose-qt' 'i' )" ];then
+			toInstall="$vboxOSE virtualbox-ose-qt"
+		fi
 	fi
 
 	if [ "$1" == 'non-ose' ];then
