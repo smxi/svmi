@@ -1506,7 +1506,7 @@ install_vbox()
 		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
 	fi
 	if [ "$1" == 'ose' -a -n "$( grep -Ei '^(2\.[2-9]|[3-4])' <<< $VBOX_VERSION )" ];then
-		if [ -z "$( check_package_status 'virtualbox-ose-qt' 'i' )" ];then
+		if [ -n "$( check_package_status 'virtualbox-ose-qt' 'c' )" -a -z "$( check_package_status 'virtualbox-ose-qt' 'i' )" ];then
 			toInstall="$vboxOSE virtualbox-ose-qt"
 		fi
 	fi
