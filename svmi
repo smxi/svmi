@@ -285,7 +285,7 @@ vmplayer_quick_fix()
 {
 	local i='' patchName=$1 patchUrl="$SCRIPT_DOWNLOAD/patches"
 	local dirData='/usr/lib/vmware/modules/source/'
-	local ua="-U s-tools/$SCRIPT_NAME.$patchName"
+	local ua="-U s-tools/$SCRIPT_NAME.patches.$patchName"
 	patchUrl="$patchUrl/$patchName"
 	
 	echo $LINE
