@@ -1,0 +1,229 @@
+Patch Source: http://communities.vmware.com//message/1213099
+
+diff -urN source-OLD/vmblock-only/Makefile source-NEW/vmblock-only/Makefile
+--- source-OLD/vmblock-only/Makefile	2008-10-28 22:47:20.000000000 -0700
++++ source-NEW/vmblock-only/Makefile	2009-03-26 19:29:30.000000000 -0700
+@@ -113,7 +113,7 @@
+ 
+ vm_check_build = $(shell if $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) \
+ 	$(CPPFLAGS) $(CFLAGS) $(CFLAGS_KERNEL) \
+-	$(EXTRA_CFLAGS) -Iinclude2/asm/mach-default \
++	$(EXTRA_CFLAGS) -I$(HEADER_DIR) -Iinclude2/asm/mach-default \
+ 	-DKBUILD_BASENAME=\"$(DRIVER)\" \
+ 	-Werror -S -o /dev/null -xc $(1) \
+ 	> /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)
+diff -urN source-OLD/vmci-only/Makefile source-NEW/vmci-only/Makefile
+--- source-OLD/vmci-only/Makefile	2008-10-28 22:47:21.000000000 -0700
++++ source-NEW/vmci-only/Makefile	2009-03-26 19:30:11.000000000 -0700
+@@ -113,7 +113,7 @@
+ 
+ vm_check_build = $(shell if $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) \
+ 	$(CPPFLAGS) $(CFLAGS) $(CFLAGS_KERNEL) \
+-	$(EXTRA_CFLAGS) -Iinclude2/asm/mach-default \
++	$(EXTRA_CFLAGS) -I$(HEADER_DIR) -Iinclude2/asm/mach-default \
+ 	-DKBUILD_BASENAME=\"$(DRIVER)\" \
+ 	-Werror -S -o /dev/null -xc $(1) \
+ 	> /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)
+Binary files source-OLD/vmmon.o and source-NEW/vmmon.o differ
+diff -urN source-OLD/vmmon-only/include/x86apic.h source-NEW/vmmon-only/include/x86apic.h
+--- source-OLD/vmmon-only/include/x86apic.h	2008-10-28 22:47:17.000000000 -0700
++++ source-NEW/vmmon-only/include/x86apic.h	2009-03-26 18:36:11.000000000 -0700
+@@ -94,7 +94,7 @@
+ #define APIC_LVT_DELVMODE(_lvt) (_lvt & 0x700)
+ #define APIC_LVT_RESET_VALUE  0x00010000
+ 
+-#define APIC_BASE_MSR         0x1b
++#define APIC_BASE_MSR         0x800
+ 
+ #define APIC_MSR_BASEMASK     QWORD(0x0000000f,0xfffff000)
+ #define APIC_MSR_ENABLED      0x00000800
+diff -urN source-OLD/vmmon-only/linux/driver.c source-NEW/vmmon-only/linux/driver.c
+--- source-OLD/vmmon-only/linux/driver.c	2008-10-28 22:47:18.000000000 -0700
++++ source-NEW/vmmon-only/linux/driver.c	2009-03-30 18:18:17.000000000 -0700
+@@ -1984,10 +1984,10 @@
+    }
+ 
+    case IOCTL_VMX86_ALLOW_CORE_DUMP:
+-      if (current->euid == current->uid &&
+-	  current->fsuid == current->uid &&
+-          current->egid == current->gid &&
+-	  current->fsgid == current->gid) {
++      if (current_euid() == current_uid() &&
++	  current_fsuid() == current_uid() &&
++          current_egid() == current_gid() &&
++	  current_fsgid() == current_gid()) {
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 23) || defined(MMF_DUMPABLE)
+          /* Dump core, readable by user. */
+          set_bit(MMF_DUMPABLE, &current->mm->flags);
+diff -urN source-OLD/vmmon-only/linux/hostif.c source-NEW/vmmon-only/linux/hostif.c
+--- source-OLD/vmmon-only/linux/hostif.c	2008-10-28 22:47:17.000000000 -0700
++++ source-NEW/vmmon-only/linux/hostif.c	2009-03-30 18:02:08.000000000 -0700
+@@ -3423,6 +3423,58 @@
+ }
+ 
+ 
++/* krellan: Linux 2.6.29 compatibility functions for capabilities */
++/* Errors are logged but otherwise ignored */
++
++void compat_cap_raise(int cap)
++{
++  struct cred *new_cred;
++  
++  new_cred = prepare_creds();
++  if (new_cred != NULL)
++  {
++    cap_raise(new_cred->cap_effective, cap);
++    commit_creds(new_cred);
++  }
++  else
++  {
++    Log("compat_cap_raise(%d) prepare_creds(): Out of memory\n", cap);
++  }
++}
++
++void compat_cap_lower(int cap)
++{
++  struct cred *new_cred;
++  
++  new_cred = prepare_creds();
++  if (new_cred != NULL)
++  {
++    cap_lower(new_cred->cap_effective, cap);
++    commit_creds(new_cred);
++  }
++  else
++  {
++    Log("compat_cap_lower(%d) prepare_creds(): Out of memory\n", cap);
++  }
++}
++
++void compat_set_fsuid(int fsuid)
++{
++  struct cred *new_cred;
++  
++  new_cred = prepare_creds();
++  if (new_cred != NULL)
++  {
++    new_cred->fsuid = fsuid;
++    commit_creds(new_cred);
++  }
++  else
++  {
++    Log("compat_set_fsuid(%d) prepare_creds(): Out of memory\n", fsuid);
++  }
++}
++
++
+ /*
+  *----------------------------------------------------------------------
+  *
+@@ -3455,7 +3507,7 @@
+    oldFS = get_fs();
+    set_fs(KERNEL_DS);
+    compat_allow_signal(SIGKILL);
+-   cap_raise(current->cap_effective, CAP_SYS_RESOURCE);
++   compat_cap_raise(CAP_SYS_RESOURCE);
+    compat_set_user_nice(current, linuxState.fastClockPriority);
+ 
+    while (linuxState.fastClockRate > HZ + HZ/16) {
+@@ -3579,19 +3631,19 @@
+          Bool cap;
+          long pid;
+ 
+-         fsuid = current->fsuid;
+-         current->fsuid = 0;
++         fsuid = current_fsuid();
++         compat_set_fsuid(0);
+          filp = filp_open("/dev/rtc", O_RDONLY, 0);
+-         current->fsuid = fsuid;
++         compat_set_fsuid(fsuid);
+          if (IS_ERR(filp)) {
+             Warning("/dev/rtc open failed: %d\n", (int)(VA)filp);
+             return -(int)(VA)filp;
+          }
+-         cap = cap_raised(current->cap_effective, CAP_SYS_RESOURCE);
+-         cap_raise(current->cap_effective, CAP_SYS_RESOURCE);
++         cap = cap_raised(current_cap(), CAP_SYS_RESOURCE);
++         compat_cap_raise(CAP_SYS_RESOURCE);
+          res = HostIFDoIoctl(filp, RTC_PIE_ON, 0);
+          if (!cap) {
+-            cap_lower(current->cap_effective, CAP_SYS_RESOURCE);            
++            compat_cap_lower(CAP_SYS_RESOURCE);
+          }
+          if (res < 0) {
+             Warning("/dev/rtc enable interrupt failed: %d\n", res);
+diff -urN source-OLD/vmmon-only/Makefile source-NEW/vmmon-only/Makefile
+--- source-OLD/vmmon-only/Makefile	2008-10-28 22:47:18.000000000 -0700
++++ source-NEW/vmmon-only/Makefile	2009-03-30 16:24:00.000000000 -0700
+@@ -113,7 +113,7 @@
+ 
+ vm_check_build = $(shell if $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) \
+ 	$(CPPFLAGS) $(CFLAGS) $(CFLAGS_KERNEL) \
+-	$(EXTRA_CFLAGS) -Iinclude2/asm/mach-default \
++	$(EXTRA_CFLAGS) -I$(HEADER_DIR) -Iinclude2/asm/mach-default \
+ 	-DKBUILD_BASENAME=\"$(DRIVER)\" \
+ 	-Werror -S -o /dev/null -xc $(1) \
+ 	> /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)
+diff -urN source-OLD/vmnet-only/Makefile source-NEW/vmnet-only/Makefile
+--- source-OLD/vmnet-only/Makefile	2008-10-28 22:47:19.000000000 -0700
++++ source-NEW/vmnet-only/Makefile	2009-03-26 19:31:13.000000000 -0700
+@@ -113,7 +113,7 @@
+ 
+ vm_check_build = $(shell if $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) \
+ 	$(CPPFLAGS) $(CFLAGS) $(CFLAGS_KERNEL) \
+-	$(EXTRA_CFLAGS) -Iinclude2/asm/mach-default \
++	$(EXTRA_CFLAGS) -I$(HEADER_DIR) -Iinclude2/asm/mach-default \
+ 	-DKBUILD_BASENAME=\"$(DRIVER)\" \
+ 	-Werror -S -o /dev/null -xc $(1) \
+ 	> /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)
+diff -urN source-OLD/vmnet-only/netif.c source-NEW/vmnet-only/netif.c
+--- source-OLD/vmnet-only/netif.c	2008-10-28 22:47:18.000000000 -0700
++++ source-NEW/vmnet-only/netif.c	2009-03-30 18:03:47.000000000 -0700
+@@ -324,7 +324,7 @@
+       goto out;
+    }
+ 
+-   dev->priv = netIf;
++   dev->ml_priv = netIf;
+    netIf->dev = dev;
+    
+    memcpy(dev->dev_addr, netIf->port.paddr, sizeof netIf->port.paddr);
+@@ -566,7 +566,7 @@
+ VNetNetifStartXmit(struct sk_buff    *skb, // IN:
+                    struct net_device *dev) // IN:
+ {
+-   VNetNetIF *netIf = (VNetNetIF*)dev->priv;
++   VNetNetIF *netIf = (VNetNetIF*)dev->ml_priv;
+ 
+    if(skb == NULL) {
+       return 0;
+@@ -618,7 +618,7 @@
+ VNetNetifSetMAC(struct net_device *dev, // IN:
+                 void *p)                // IN:
+ {
+-   VNetNetIF *netIf = (VNetNetIF*)dev->priv;
++   VNetNetIF *netIf = (VNetNetIF*)dev->ml_priv;
+    struct sockaddr const *addr = p;
+    if (!VMX86_IS_STATIC_MAC(addr->sa_data)) {
+       return -EINVAL;
+@@ -675,7 +675,7 @@
+ struct net_device_stats *
+ VNetNetifGetStats(struct net_device *dev) // IN:
+ {
+-   VNetNetIF *netIf = (VNetNetIF*)dev->priv;
++   VNetNetIF *netIf = (VNetNetIF*)dev->ml_priv;
+    return &(netIf->stats);
+ }
+ 
+diff -urN source-OLD/vsock-only/Makefile source-NEW/vsock-only/Makefile
+--- source-OLD/vsock-only/Makefile	2008-10-28 22:47:22.000000000 -0700
++++ source-NEW/vsock-only/Makefile	2009-03-26 19:32:12.000000000 -0700
+@@ -113,7 +113,7 @@
+ 
+ vm_check_build = $(shell if $(CC) $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS) \
+ 	$(CPPFLAGS) $(CFLAGS) $(CFLAGS_KERNEL) \
+-	$(EXTRA_CFLAGS) -Iinclude2/asm/mach-default \
++	$(EXTRA_CFLAGS) -I$(HEADER_DIR) -Iinclude2/asm/mach-default \
+ 	-DKBUILD_BASENAME=\"$(DRIVER)\" \
+ 	-Werror -S -o /dev/null -xc $(1) \
+ 	> /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)

@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.17
-####  Date: April 30 2009
+####  version: 2.3.18
+####  Date: May 8 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -271,6 +271,16 @@ apply_fixes_post_install()
 						2.5.2)
 							#patch src: http://communities.vmware.com/thread/203231
 							modulePatch='vmware-modules-2.6.29-2.5.2-1.patch'
+							vmplayer_quick_fix "$modulePatch"
+							;;
+					esac
+					;;
+				30)
+					case $VMPLAYER_NUMBER in
+						# patch source: http://communities.vmware.com/thread/208963
+						2.5.2)
+							#patch src: http://communities.vmware.com/thread/203231
+							modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
 							vmplayer_quick_fix "$modulePatch"
 							;;
 					esac
