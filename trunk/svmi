@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.18
-####  Date: May 8 2009
+####  version: 2.3.19
+####  Date: June 11 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -199,10 +199,11 @@ esac
 APT_VBOX_VERSION=''
 APT_VBOX_VERSION_FULL=''
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='46594'
-VBOX_VERSION='2.2.2'
+VBOX_PACKAGE_NO='47978'
+VBOX_VERSION='2.2.4'
 # vbox 2 and greater have this extra string: set in install_vbox_non_ose
 VBOX_V=''
+# http://.../2.2.4/virtualbox-2.2_2.2.4-47978_Debian_lenny_i386.deb
 # http://.../2.2.2/virtualbox-2.2_2.2.2-46594_Debian_lenny_amd64.deb
 # http://.../2.2.0/virtualbox-2.2_2.2.0-45846_Debian_lenny_i386.deb
 # http://.../2.1.0/virtualbox-2.1_2.1.0-41146_Debian_lenny_i386.deb
@@ -210,6 +211,7 @@ VBOX_V=''
 # http://.../2.1.4/virtualbox-2.1_2.1.4-42893_Debian_lenny_i386.deb
 # 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 1.6.0:30421 1.6.2:31466 1.6.4:33808
 # 2.0.0:36011 2.0.2:36488 2.0.4:38406 2.0.6:39765 2.1.0:41146 2.1.2:41885 2.2.0:45846
+# 2.2.2:46594
 VBOX_PREVIOUS="1.6.6:35336 2.0.6:39765 2.1.4:42893 $VBOX_VERSION:$VBOX_PACKAGE_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
@@ -1093,7 +1095,7 @@ vm_main_selector()
 	echo "    Module is built automatically."
 	echo "${C}8${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
-	echo "${C}9${S} - ${C}build-vbox-module-non-ose${S} Will reconfigure existing virtualbox to rebuild module."
+	echo "${C}9${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
 	echo "${C}10${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
@@ -1644,71 +1646,79 @@ install_vbox_module()
 	local success=''
 
 	echo $LINE
-	if [ "$1" == 'ose' ];then
-		preinstall_cleanup # get rid of previous modules
-		# then reset version information
-		set_installed_vbox_version
-		local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
-		local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
-		local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-"
-		local vboxSource=$( dpkg -l | grep -i $vbs )
-		local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
-		local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
-		local modDeb=$( ls $modDebPath 2> /dev/null )
 
-		# we'll only get the source if we need to build the module
-		# I'm going to try to force the update as well, since otherwise users
-		# will have an unmatched vbox versioning
-	# 	if [ -z "$vboxSource" -o -z "$vboxSlhMod" ]
-	# 	then
-			echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
-			install_package "$vbo $vbs"
-	# 	fi
-		# set it again in case the stuff changed
-		set_installed_vbox_version
-
-		# we need to check that the kernel module version matches the installed version:
-		# that means it must have the right vbox version number in the deb string
-		local vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
-
-		# note: here we have to make sure that the installed stuff is the same version
-		# as the slh prebuilt modules. If not, we'll simply make the modules manually
-
-		# since we have to be able to update modules actively, I'm removing the test for
-		# loaded, that triggers a condition that requires running module install two times
-		# if the old module isn't working right, or is for wrong vbox version
-# 		if [ -z "$vbModLoaded" ]
-# 		then
-			if [ -z "$modDeb" -o -z "$vboxSlhMod" ];then
-				echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
-				log_function_data "Building $vbdv module now and running modprobe..."
-				m-a a-i $vbs || error_handler 197 $vbdv
-			else
-				echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
-				log_function_data "Installing prebuilt slh vbox kernel modules: $modDeb"
-				dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
-			fi
-# 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
-			modprobe $vbdv
-# 		else
-# 			echo "${M}Kernel Module ${C}$vbdv${M} is already installed...${N}"
-# 			log_function_data "Kernel Module $vbdv is already installed..."
-# 		fi
-		success='true'
-	elif [ "$1" == 'non-ose' ];then
-		local nonOse="virtualbox$APT_VBOX_VERSION_FULL"
-		# make sure vbox non ose is installed
-		local nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
-
-		if [ -n "$nonOseInstalled" ];then
-			echo "${S}Running ${C}dpkg-reconfigure${S} on ${C}$nonOse${S}...${N}"
-			dpkg-reconfigure $nonOse
+	case $1 in
+		ose)
+			preinstall_cleanup # get rid of previous modules
+			# then reset version information
+			set_installed_vbox_version
+			local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
+			local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
+			local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-"
+			local vboxSource=$( dpkg -l | grep -i $vbs )
+			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
+			local modDeb=$( ls $modDebPath 2> /dev/null )
+	
+			# we'll only get the source if we need to build the module
+			# I'm going to try to force the update as well, since otherwise users
+			# will have an unmatched vbox versioning
+		# 	if [ -z "$vboxSource" -o -z "$vboxSlhMod" ]
+		# 	then
+				echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
+				install_package "$vbo $vbs"
+		# 	fi
+			# set it again in case the stuff changed
+			set_installed_vbox_version
+	
+			# we need to check that the kernel module version matches the installed version:
+			# that means it must have the right vbox version number in the deb string
+			local vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
+	
+			# note: here we have to make sure that the installed stuff is the same version
+			# as the slh prebuilt modules. If not, we'll simply make the modules manually
+	
+			# since we have to be able to update modules actively, I'm removing the test for
+			# loaded, that triggers a condition that requires running module install two times
+			# if the old module isn't working right, or is for wrong vbox version
+	# 		if [ -z "$vbModLoaded" ]
+	# 		then
+				if [ -z "$modDeb" -o -z "$vboxSlhMod" ];then
+					echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
+					log_function_data "Building $vbdv module now and running modprobe..."
+					m-a a-i $vbs || error_handler 197 $vbdv
+				else
+					echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
+					log_function_data "Installing prebuilt slh vbox kernel modules: $modDeb"
+					dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
+				fi
+	# 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
+				modprobe $vbdv
+	# 		else
+	# 			echo "${M}Kernel Module ${C}$vbdv${M} is already installed...${N}"
+	# 			log_function_data "Kernel Module $vbdv is already installed..."
+	# 		fi
 			success='true'
-		else
-			echo "${C}$nonOse${E} does not appear to be installed, please install it using the menu options."
-			echo "${S}You cannot build the module without having first installed the non-ose vbox!${N}"
-		fi
-	fi
+			;;
+		non-ose)
+			local nonOse="virtualbox$APT_VBOX_VERSION_FULL"
+			# make sure vbox non ose is installed
+			# /etc/init.d/vboxdrv setup 
+			local nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
+			local vboxInit='/etc/init.d/vboxdrv'
+	
+			if [ -n "$nonOseInstalled" -a -e "$vboxInit"  ];then
+				echo "${S}Running ${C}$vboxInit setup${S} on ${C}$nonOse${S}...${N}"
+				$vboxInit setup
+				# dpkg-reconfigure $nonOse
+				success='true'
+			else
+				echo "${C}$nonOse${E} does not appear to be installed, please install it using the menu options."
+				echo "${S}You cannot build the module without having first installed the non-ose vbox!${N}"
+			fi
+			;;
+	esac
+
 	if [ "$success" == 'true' ];then
 		# we're going to run this stuff for ose and non-ose now to make sure all users
 		# get this, that might help some fringe cases
