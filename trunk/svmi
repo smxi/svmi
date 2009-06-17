@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.19
-####  Date: June 11 2009
+####  version: 2.3.20
+####  Date: June 17 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -638,12 +638,21 @@ check_install_tools()
 
 	if [ -x "$ubgv" ];then
 		# the correct g++ version is required for the gcc version to build module
-		if [ ! -x "/usr/bin/g++-$gccVersion" ];then
-			install_package g++-$gccVersion
+		if [ ! -x "/usr/bin/g++-$gccVersion" -a -n "$( check_package_status "g++-$gccVersion" 'c' )" ];then
+			install_package "g++-$gccVersion"
 		fi
 		export CC=$ubgv
 	else
-		error_handler 250 "$ubgv"
+		# going to try to update gcc to kernel version first before error exit.
+		if [ -n "$( check_package_status "gcc-$gccVersion" 'c' )" ];then
+			install_package "gcc-$gccVersion"
+			if [ "$( check_package_status "g++-$gccVersion" 'c' )" ];then
+				install_package "g++-$gccVersion"
+			fi
+			export CC=$ubgv
+		else
+			error_handler 250 "$ubgv"
+		fi
 	fi
 	eval $LOGPE
 }
