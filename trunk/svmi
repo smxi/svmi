@@ -282,7 +282,9 @@ apply_fixes_post_install()
 						# patch source: http://communities.vmware.com/thread/208963
 						2.5.2)
 							#patch src: http://communities.vmware.com/thread/203231
-							modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
+							# modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
+							# src: http://communities.vmware.com/thread/208963
+							modulePatch='vmware-modules-2.6.30-2.5.2-2.patch'
 							vmplayer_quick_fix "$modulePatch"
 							;;
 					esac
