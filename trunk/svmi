@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.24
+####  version: 2.3.25
 ####  Date: August 6 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1507,18 +1507,21 @@ create_qemu_image()
 set_installed_vbox_version()
 {
 	eval $LOGUS
-
-	APT_VBOX_VERSION=$( apt-cache search ^virtualbox-[2-9] | cut -d ' ' -f 1 | cut -d '-' -f 2 )
+	
+	# note: the 2-9 syntax is no longer used by debian packages, but now
+	# vbox non ose uses this: virtualbox-3.0
+	APT_VBOX_VERSION=$( apt-cache search ^virtualbox-[2-9]\.[0-9] | awk '{print $1}' | cut -d '-' -f 2 )
 	if [ -n "$APT_VBOX_VERSION" ];then
 		APT_VBOX_VERSION_FULL="-$APT_VBOX_VERSION"
 	fi
 	# this is a hack made necessary by new naming method in debian for -2.0
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | cut -d ':' -f 2-4 | cut -d ' ' -f2 | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | awk '{print $2}' | cut -d '-' -f 1 | egrep -o '[0-9].[0-9].[0-9]')
 
 	log_function_data "APT_VBOX_VERSION: $APT_VBOX_VERSION\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION"
 
 	eval $LOGUE
 }
+
 # create and install vbox module:
 # $1 is ose/non-ose; $2 - lenny/etch
 install_vbox()
