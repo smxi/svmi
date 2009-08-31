@@ -289,11 +289,16 @@ apply_fixes_post_install()
 				30)
 					case $VMPLAYER_NUMBER in
 						# patch source: http://communities.vmware.com/thread/208963
-						2.5.2|2.5.3)
+						2.5.2)
 							#patch src: http://communities.vmware.com/thread/203231
 							# modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
 							# src: http://communities.vmware.com/thread/208963
 							modulePatch='vmware-modules-2.6.30-2.5.2-2.patch'
+							vmplayer_quick_fix "$modulePatch"
+							;;
+						2.5.3)
+							# src: http://communities.vmware.com/thread/221724
+							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
 							vmplayer_quick_fix "$modulePatch"
 							;;
 					esac
