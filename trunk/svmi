@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.27
-####  Date: August 21 2009
+####  version: 2.3.28
+####  Date: August 31 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -141,6 +141,9 @@ VMWARE_NAME_PREVIOUS='VMware-player'
 VMPLAYER_NUMBER='2.5.2'
 VMPLAYER_BUILD='156735'
 VMWARE_NAME='VMware-Player'
+# only for dev/debugging purposes
+VMPLAYER_NUMBER_TESTING='2.5.3'
+VMPLAYER_BUILD_TESTING='185404'
 
 VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
 VMPLAYER_VERSION_PREVIOUS="$VMWARE_NAME_PREVIOUS-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
@@ -286,7 +289,7 @@ apply_fixes_post_install()
 				30)
 					case $VMPLAYER_NUMBER in
 						# patch source: http://communities.vmware.com/thread/208963
-						2.5.2)
+						2.5.2|2.5.3)
 							#patch src: http://communities.vmware.com/thread/203231
 							# modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
 							# src: http://communities.vmware.com/thread/208963
@@ -297,7 +300,7 @@ apply_fixes_post_install()
 					;;
 				31)
 					case $VMPLAYER_NUMBER in
-						2.5.2)
+						2.5.2|2.5.3)
 							# src: http://communities.vmware.com/thread/221724
 							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
 							vmplayer_quick_fix "$modulePatch"
@@ -371,8 +374,8 @@ set_test_data()
 set_testing_version()
 {
 	if [ "$B_TESTING_2" == 'true' ];then
-		VMPLAYER_NUMBER='2.5.1'
-		VMPLAYER_BUILD='126130'
+		VMPLAYER_NUMBER=$VMPLAYER_NUMBER_TESTING
+		VMPLAYER_BUILD=$VMPLAYER_BUILD_TESTING
 		VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
 	fi
 }
