@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.3.28
-####  Date: August 31 2009
+####  version: 2.3.29
+####  Date: September 9 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -137,13 +137,13 @@ VMPLAYER_NUMBER_PREVIOUS='2.0.5'
 VMPLAYER_BUILD_PREVIOUS='109488'
 VMWARE_NAME_PREVIOUS='VMware-player'
 # current version
-# 2.5.0 118166;2.5.1 126130;
-VMPLAYER_NUMBER='2.5.2'
-VMPLAYER_BUILD='156735'
+# 2.5.2 156735;2.5.0 118166;2.5.1 126130;
+VMPLAYER_NUMBER='2.5.3'
+VMPLAYER_BUILD='185404'
 VMWARE_NAME='VMware-Player'
 # only for dev/debugging purposes
-VMPLAYER_NUMBER_TESTING='2.5.3'
-VMPLAYER_BUILD_TESTING='185404'
+VMPLAYER_NUMBER_TESTING=''
+VMPLAYER_BUILD_TESTING=''
 
 VMPLAYER_VERSION="$VMWARE_NAME-$VMPLAYER_NUMBER-$VMPLAYER_BUILD"
 VMPLAYER_VERSION_PREVIOUS="$VMWARE_NAME_PREVIOUS-$VMPLAYER_NUMBER_PREVIOUS-$VMPLAYER_BUILD_PREVIOUS"
