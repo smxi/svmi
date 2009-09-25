@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.4.0
-####  Date: September 21 2009
+####  version: 2.4.1
+####  Date: September 25 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -205,10 +205,11 @@ esac
 APT_VBOX_VERSION=''
 APT_VBOX_VERSION_FULL=''
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='50677'
-VBOX_VERSION='3.0.4'
+VBOX_PACKAGE_NO='52128'
+VBOX_VERSION='3.0.6'
 # vbox 2 and greater have this extra string: set in install_vbox_non_ose
 VBOX_V=''
+# http://.../3.0.6/virtualbox-3.0_3.0.6-52128_Debian_lenny_i386.deb
 # http://.../3.0.4/virtualbox-3.0_3.0.4-50677_Debian_lenny_i386.deb
 # http://.../3.0.2/virtualbox-3.0_3.0.2-49928_Debian_lenny_i386.deb
 # http://.../3.0.0/virtualbox-3.0_3.0.0-49315_Debian_lenny_i386.deb
