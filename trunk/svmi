@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.4.1
-####  Date: September 25 2009
+####  version: 2.4.2
+####  Date: October 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1197,27 +1197,27 @@ vbox_main_selector()
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
 	echo $LINE
-	echo "${C}3${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
-	echo "    Module is built automatically."
-	echo "${C}4${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
+# 	echo "${C}3${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
+# 	echo "    Module is built automatically."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
-	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
+	echo "${C}4${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
-	echo "${C}6${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "${C}5${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
 	echo "    for your currently installed virtualbox version: ${C}$VBOX_INSTALLED_VERSION"
 
 	echo $LINE
-	echo "${C}7${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
+	echo "${C}6${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
 
-	echo "${C}8${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
-	echo "${C}9${S} - ${C}$quitContinue${S}"
+	echo "${C}7${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
+	echo "${C}8${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-etch install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
+	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
 	select opt in $options
 	do
 		case $opt in
