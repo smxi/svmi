@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.4.3
+####  version: 2.4.4
 ####  Date: October 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -2041,7 +2041,7 @@ install_vbox_addons()
 			mkdir $vboxAddDir
 		fi
 		cd $vboxAddDir
-		wget -O $vboxAddonFile $vboxAddonURL || echo -e "${E}The vbox addons download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		wget -O $vboxAddonFile $vboxAddonURL
 		if [ "$?" -gt 0 ];then
 			error_handler 190 "$vboxAddonFile"
 			downloadError=1
