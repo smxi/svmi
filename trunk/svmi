@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.4.2
+####  version: 2.4.3
 ####  Date: October 1 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -516,7 +516,10 @@ error_handler()
 		248)
 			errorData="The file: $errorExtra appears to be corrupted. Please try to update again."
 			;;
-		# specific install issues
+		247)
+			errorData="Unsupported testing option argument: -! $errorExtra"
+			;;
+		# specific install issues, non fatal cases
 		200)
 			errorData="The package: $errorExtra failed to install, please check apt for any problems."
 			;;
@@ -548,10 +551,13 @@ error_handler()
 			errorData="The deb package $errorExtra failed to install correctly."
 			;;
 		190)
-			errorData="Unsupported testing option argument: -! $errorExtra"
+			errorData="Wget reports errors on download attempt for file:\n$errorExtra"
 			;;
 		189)
 			errorData="Patching failed for $2"
+			;;
+		188)
+			errorData="The required variable $errorExtra failed to set and is null."
 			;;
 		*)
 			errorData="Unexpected Error !"
@@ -564,9 +570,15 @@ error_handler()
 		echo
 		echo "${S}Log file is located here: $LOG_FILE"
 	fi
-	echo "${M}Exiting script now.${N}"
-
-	exit $errorCode
+	if [ "$errorCode" -gt 200 ];then 
+		echo "${M}Exiting script now.${N}"
+		exit $errorCode
+	else
+		echo $MLINE
+		echo "${M}Continuing with script after non fatal Error Event: ${C}$errorCode${N}"
+		print_hec
+		return $errorCode
+	fi
 }
 
 ########################################################################
@@ -782,6 +794,8 @@ install_package()
 {
 	eval $LOGUS
 	local useUntrusted='--allow-unauthenticated' install='install' doYes='-y'
+	local returnValue=0
+	
 	if [ "$UPDATED" != 'true' ];then
 		echo "${S}Running $APT_TYPE update now...${N}"
 		$APT_TYPE update && UPDATED='true'
@@ -798,15 +812,17 @@ install_package()
 	if  [ -n "$1" ];then
 		echo "${S}Installing required package ${C}$1${S} now...${N}"
 		$APT_TYPE install $WITHOUT_RECOMMENDS $useUntrusted $doYes $1 || error_handler 200 $1
+		returnValue="$?"
 	fi
 	eval $LOGUE
+	return $returnValue
 }
 
 # args: $1 - package list to remove; $2 - remove-all/loop
 remove_package()
 {
 	eval $LOGUS
-	local response='' package=''
+	local response='' package='' returnValue=0
 
 	if [ -n "$1" ];then
 		case $2 in
@@ -1691,6 +1707,7 @@ install_vbox()
 	local vboxOseVersion=''
 	# default to ose install
 	local toInstall="$vboxOSE" toRemove="$vboxBad $vboxGeneral"
+	local returnValue=0
 	
 	if [ -n "$( test_package_available 'virtualbox-2.0-ose' )" ];then
 		vboxOSE='virtualbox-2.0-ose virtualbox-2.0-ose-source'
@@ -1732,11 +1749,15 @@ install_vbox()
 			fi
 			;;
 		non-ose)
-			install_vbox_non_ose "$2"
+			install_vbox_non_ose "$2" || returnValue=$?
 			;;
 	esac
-
-	add_vbox_user
+	log_function_data "returnValue: $returnValue"
+	if [ "$returnValue" -eq 0 ];then
+		add_vbox_user
+	else
+		echo "${M}Unable to complete the vbox install process due to errors.${N}"
+	fi
 
 	eval $LOGPE
 	print_hec
@@ -1746,7 +1767,7 @@ install_vbox()
 install_vbox_non_ose()
 {
 	eval $LOGPS
-	local arch='i386' installError=0
+	local arch='i386' installError=0 downloadError=0 returnValue=0
 	if [ "$BITS" == '64' ];then
 		arch='amd64'
 	fi
@@ -1770,12 +1791,16 @@ install_vbox_non_ose()
 
 	if [ ! -f $debName ];then
 		echo "${S}Downloading package ${C}$debName${S}...${N}"
-		wget -O $debName $vboxNonOseURL || echo -e "${E}The vbox $debName download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		wget -O $debName $vboxNonOseURL
+		if [ "$?" -gt 0 ];then
+			error_handler 190 "$debName"
+			downloadError=1
+		fi
 	else
 		echo "${S}Using previously downloaded package: ${C}$debName${N}"
 	fi
 
-	if [ -s $debName ];then
+	if [ -s "$debName" -a "$downloadError" -eq 0 ];then
 		echo "${S}Installing non free debian virtual box deb now...${N}"
 		# dpkg -i $debName 2>> $LOG_FILE || error_handler 191 $debName
 		dpkg -i $debName 2>> $LOG_FILE 2>&1 || installError=1
@@ -1795,6 +1820,7 @@ install_vbox_non_ose()
 				;;
 			2)
 				echo "${E}Sorry, the install failed for some reason, let's find out why.${N}"
+				returnValue=2
 				;;
 		esac
 	else
@@ -1802,9 +1828,13 @@ install_vbox_non_ose()
 		if [ -f $debName ];then
 			rm -f $debName
 		fi
+		returnValue=1
 	fi
+	log_function_data "downloadError: $downloadError :: returnValue: $returnValue :: installError: $installError"
+
 	eval $LOGPE
 	print_hec
+	return $returnValue
 }
 #install_vbox_non_ose;exit
 
@@ -1980,14 +2010,25 @@ add_vbox_user()
 install_vbox_addons()
 {
 	eval $LOGPS
-
-	local vboxLib='/usr/lib/virtualbox/'  vboxAddDir='additions'
+	# need to make sure that for non-ose it's set as well
+	set_installed_vbox_version
+	local vboxLib='/usr/lib/virtualbox/' vboxAddDir='additions'
 	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION'.iso'
 	local vboxAddonName='VBoxGuestAdditions.iso'
 	local vboxAddonURL=$VBOX_DOWNLOAD_SERVER$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
+	local downloadState=0 downloadError=0 returnValue=0
+	
+	log_function_data "vboxAddonURL: $vboxAddonURL"
 
 	echo $LINE
-	if [ -d $vboxLib ];then
+	
+	if [ ! -d $vboxLib ];then
+		echo "${E}Virtualbox does not appear to be installed! Please install it first!${N}"
+		returnValue=2
+	elif [ -z "$VBOX_INSTALLED_VERSION" ];then
+		error_handler 188 "VBOX_INSTALLED_VERSION"
+		returnValue=3
+	else
 		cd $vboxLib
 		# for some reason debian/vbox devs changed the default download
 		# path for the addons, and it doesn't match, so here the old
@@ -2001,21 +2042,26 @@ install_vbox_addons()
 		fi
 		cd $vboxAddDir
 		wget -O $vboxAddonFile $vboxAddonURL || echo -e "${E}The vbox addons download failed, the file name probably changed.\nPlease let the svmi script maintainer know this.${N}"
+		if [ "$?" -gt 0 ];then
+			error_handler 190 "$vboxAddonFile"
+			downloadError=1
+		fi
 
-		if [ -s $vboxAddonFile ];then
+		if [ -s $vboxAddonFile -a "$downloadError" -eq 0 ];then
 			mv $vboxAddonFile $vboxAddonName
 			echo "${S}Please note: to use the ${C}$VBOX_INSTALLED_VERSION${S} iso, simply run vbox, then start your virtual machine."
 			echo "When it is running, you will see a ${C}Devices${S} menu item. Select ${C}Install Guest Additions${S}"
 			echo "vbox will discover the iso you just downloaded and use it for drivers and other tools.${N}"
 		else
 			echo "${E}Sorry, the download failed for some reason, let's find out why.${N}"
+			returnValue=1
 		fi
-	else
-		echo "${E}Virtualbox does not appear to be installed! Please install it first!${N}"
 	fi
 	echo
+	log_function_data "returnValue: $returnValue :: downloadError: $downloadError"
 	print_hec
 	eval $LOGPE
+	return $returnValue
 }
 # install_vbox_addons
 ########################################################################
@@ -2186,7 +2232,7 @@ get_options()
 # 					21)
 # 						PATCH_DOWNLOAD="$SCRIPT_DOWNLOAD_BRANCH_2"
 # 						;;
-					*)	error_handler 190 "$OPTARG"
+					*)	error_handler 247 "$OPTARG"
 						;;
 				esac
 				START_OPTIONS="$START_OPTIONS -! $OPTARG"
