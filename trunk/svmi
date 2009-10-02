@@ -2016,7 +2016,7 @@ install_vbox_addons()
 	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION'.iso'
 	local vboxAddonName='VBoxGuestAdditions.iso'
 	local vboxAddonURL=$VBOX_DOWNLOAD_SERVER$VBOX_INSTALLED_VERSION'/'$vboxAddonFile
-	local downloadState=0 downloadError=0 returnValue=0
+	local downloadError=0 returnValue=0
 	
 	log_function_data "vboxAddonURL: $vboxAddonURL"
 
