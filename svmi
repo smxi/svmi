@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.1
+####  version: 2.5.2
 ####  Date: October 3 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -202,7 +202,7 @@ case $KERNEL_THIRD in
 		;;
 esac
 
-APT_VBOX_VERSION_FULL=''
+APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
 VBOX_PACKAGE_NO='52128'
 VBOX_VERSION='3.0.6'
@@ -1684,64 +1684,24 @@ create_qemu_image()
 ### vbox functions
 ### -------------------------------------------------------------------
 
-# this will set the global installed vbox version to handle mismatches
-set_installed_vbox_version()
-{
-	eval $LOGUS
-	
-	local workingVboxData='' vbox1='' vbox2=0 vboxGreater=''
-	
-	# note: the 2-9 syntax is no longer used by debian packages, but now
-	# vbox non ose uses this: virtualbox-3.0
-	workingVboxData=$( apt-cache search ^virtualbox-[2-9]\.[0-9] | awk '{print $1}' | cut -d '-' -f 2 )
-	# straighten it out
-	workingVboxData=$( echo $workingVboxData )
-	# for some reason for non-ose this will return > 1, I don't know why, so get the biggest:
-	if [ -n "$workingVboxData" -a "$( wc -w <<< $workingVboxData )" -gt 1 ];then
-		for vbox1 in $workingVboxData
-		do
-			dpkg --compare-versions "$vbox1" ge "$vbox2"
-			vboxGreater=$?
-			#now, if 1 is greater than 2, use it, otherwise use 2
-			if [ "$vboxGreater" -eq 0 ];then
-				vbox2=$vbox1
-			fi
-		done
-	fi
-	# if a version number found that is, place into global
-	if [ "$vbox2" != '0' ];then
-		workingVboxData=$vbox2
-	fi
-
-	if [ -n "$workingVboxData" ];then
-		APT_VBOX_VERSION_FULL="-$workingVboxData"
-	fi
-	# this is a hack made necessary by new naming method in debian for -2.0
-# 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | awk '{print $2}' | cut -d '-' -f 1 | egrep -o '[0-9]\.[0-9]\.[0-9]')
-
-	log_function_data "workingVboxData: $workingVboxData :: APT_VBOX_VERSION_FULL: $APT_VBOX_VERSION_FULL"
-
-	eval $LOGUE
-}
-
 get_vbox_installed_version()
 {
 	eval $LOGUS
 	
+	# this should handle virtualbox-2.0-ose; virtualbox-ose; virtualbox-3.0
+	# slice out name and version number
 	local workingVbox=$( dpkg -l | awk '{print $2 " " $3}' |grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|-[0-9]\.[0-9])[[:space:]]' )
-	local workingVboxName=$( echo $workingVbox | awk '{print $2}' | cut -d '-' -f 1 )
 	
 	if [ -z "$workingVbox" ];then
 		: # do nothing, leave unset for other error handling
 	elif [ "$( wc -w <<< $workingVbox )" -eq 2 ];then
 		VBOX_INSTALLED_VERSION=$( echo $workingVbox | awk '{print $2}' | cut -d '-' -f 1 )
-		# this should handle virtualbox-2.0-ose; virtualbox-ose; virtualbox-3.0
-		APT_VBOX_VERSION_FULL=$( grep -Eo '\-[0-9]+\.[0-9]+' <<< $workingVboxName )
+		APT_VBOX_VERSION_NU=$( echo $workingVbox | awk '{print $1}' | grep -Eo '\-[0-9]+\.[0-9]+' )
 	else
 		error_handler 187 "$workingVbox"
 	fi
 
-	log_function_data "workingVbox: $workingVbox\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION :: APT_VBOX_VERSION_FULL: $APT_VBOX_VERSION_FULL"
+	log_function_data "workingVbox: $workingVbox\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION :: APT_VBOX_VERSION_NU: $APT_VBOX_VERSION_NU"
 	
 	eval $LOGUE
 }
@@ -1905,9 +1865,9 @@ install_vbox_module()
 			preinstall_cleanup # get rid of previous modules
 			# then reset version information
 			get_vbox_installed_version
-			local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
-			local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
-			local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-"
+			local vbs="virtualbox$APT_VBOX_VERSION_NU-ose-source"
+			local vbo="virtualbox$APT_VBOX_VERSION_NU-ose"
+			local modDebName="virtualbox-ose$APT_VBOX_VERSION_NU-"
 			local vboxSource=$( dpkg -l | grep -i $vbs )
 			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
@@ -1960,7 +1920,7 @@ install_vbox_module()
 			
 			;;
 		non-ose)
-			local nonOse="virtualbox$APT_VBOX_VERSION_FULL"
+			local nonOse="virtualbox$APT_VBOX_VERSION_NU"
 			# make sure vbox non ose is installed
 			# /etc/init.d/vboxdrv setup 
 			local nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
