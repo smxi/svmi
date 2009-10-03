@@ -1690,7 +1690,7 @@ get_vbox_installed_version()
 	
 	# this should handle virtualbox-2.0-ose; virtualbox-ose; virtualbox-3.0
 	# slice out name and version number
-	local workingVbox=$( dpkg -l | awk '{print $2 " " $3}' |grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|-[0-9]\.[0-9])[[:space:]]' )
+	local workingVbox=$( dpkg -l | grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|-[0-9]\.[0-9])[[:space:]]' | awk '{print $2 " " $3}'  )
 	
 	if [ -z "$workingVbox" ];then
 		: # do nothing, leave unset for other error handling
