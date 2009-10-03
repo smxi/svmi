@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.4.4
-####  Date: October 1 2009
+####  version: 2.5.0
+####  Date: October 3 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -202,7 +202,6 @@ case $KERNEL_THIRD in
 		;;
 esac
 
-APT_VBOX_VERSION=''
 APT_VBOX_VERSION_FULL=''
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
 VBOX_PACKAGE_NO='52128'
@@ -558,6 +557,12 @@ error_handler()
 			;;
 		188)
 			errorData="The required variable $errorExtra failed to set and is null."
+			;;
+		187)
+			errorData="You appear to have the following virtualbox versions installed:\n $errorExtra\n$SCRIPT_NAME cannot know which you want to use here."
+			;;
+		186)
+			errorData="${C}$errorExtra${E} does not appear to be installed, please install it using the menu options.\nYou cannot build the module without having first installed the $errorExtra!"
 			;;
 		*)
 			errorData="Unexpected Error !"
@@ -1187,9 +1192,12 @@ vm_main_selector()
 vbox_main_selector()
 {
 	eval $LOGPS
-	local repeat='' options='' opt='' quitContinue='quit'
+	local repeat='' options='' opt='' quitContinue='quit' vboxInstalled='None Detected'
 	# testing for both ose and non ose versions, then installing the requested version
-	set_installed_vbox_version
+	get_vbox_installed_version
+	if [ -n "$VBOX_INSTALLED_VERSION" ];then
+		vboxInstalled=$VBOX_INSTALLED_VERSION
+	fi
 	if [ "$SM_INSTALL" == 'true' ];then
 		quitContinue='return-to-smxi'
 	fi
@@ -1221,7 +1229,7 @@ vbox_main_selector()
 	echo $LINE
 	echo "${C}5${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
-	echo "    for your currently installed virtualbox version: ${C}$VBOX_INSTALLED_VERSION"
+	echo "    for your currently installed virtualbox version: ${C}$vboxInstalled"
 
 	echo $LINE
 	echo "${C}6${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
@@ -1682,17 +1690,60 @@ set_installed_vbox_version()
 {
 	eval $LOGUS
 	
+	local workingVboxData='' vbox1='' vbox2=0 vboxGreater=''
+	
 	# note: the 2-9 syntax is no longer used by debian packages, but now
 	# vbox non ose uses this: virtualbox-3.0
-	APT_VBOX_VERSION=$( apt-cache search ^virtualbox-[2-9]\.[0-9] | awk '{print $1}' | cut -d '-' -f 2 )
-	if [ -n "$APT_VBOX_VERSION" ];then
-		APT_VBOX_VERSION_FULL="-$APT_VBOX_VERSION"
+	workingVboxData=$( apt-cache search ^virtualbox-[2-9]\.[0-9] | awk '{print $1}' | cut -d '-' -f 2 )
+	# straighten it out
+	workingVboxData=$( echo $workingVboxData )
+	# for some reason for non-ose this will return > 1, I don't know why, so get the biggest:
+	if [ -n "$workingVboxData" -a "$( wc -w <<< $workingVboxData )" -gt 1 ];then
+		for vbox1 in $workingVboxData
+		do
+			dpkg --compare-versions "$vbox1" ge "$vbox2"
+			vboxGreater=$?
+			#now, if 1 is greater than 2, use it, otherwise use 2
+			if [ "$vboxGreater" -eq 0 ];then
+				vbox2=$vbox1
+			fi
+		done
+	fi
+	# if a version number found that is, place into global
+	if [ "$vbox2" != '0' ];then
+		workingVboxData=$vbox2
+	fi
+
+	if [ -n "$workingVboxData" ];then
+		APT_VBOX_VERSION_FULL="-$workingVboxData"
 	fi
 	# this is a hack made necessary by new naming method in debian for -2.0
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | awk '{print $2}' | cut -d '-' -f 1 | egrep -o '[0-9]\.[0-9]\.[0-9]')
+# 	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= VBOX_INSTALLED_VERSION=$( apt-cache policy virtualbox$APT_VBOX_VERSION_FULL-ose virtualbox$APT_VBOX_VERSION_FULL 2>/dev/null | grep 'Installed:' | awk '{print $2}' | cut -d '-' -f 1 | egrep -o '[0-9]\.[0-9]\.[0-9]')
 
-	log_function_data "APT_VBOX_VERSION: $APT_VBOX_VERSION\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION"
+	log_function_data "workingVboxData: $workingVboxData :: APT_VBOX_VERSION_FULL: $APT_VBOX_VERSION_FULL"
 
+	eval $LOGUE
+}
+
+get_vbox_installed_version()
+{
+	eval $LOGUS
+	
+	local workingVbox=$( dpkg -l | awk '{print $2 " " $3}' |grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|-[0-9]\.[0-9])[[:space:]]' )
+	local workingVboxName=$( echo $workingVbox | awk '{print $2}' | cut -d '-' -f 1 )
+	
+	if [ -z "$workingVbox" ];then
+		: # do nothing, leave unset for other error handling
+	elif [ "$( wc -w <<< $workingVbox )" -eq 2 ];then
+		VBOX_INSTALLED_VERSION=$( echo $workingVbox | awk '{print $2}' | cut -d '-' -f 1 )
+		# this should handle virtualbox-2.0-ose; virtualbox-ose; virtualbox-3.0
+		APT_VBOX_VERSION_FULL=$( grep -Eo '\-[0-9]+\.[0-9]+' <<< $workingVboxName )
+	else
+		error_handler 187 "$workingVbox"
+	fi
+
+	log_function_data "workingVbox: $workingVbox\nVBOX_INSTALLED_VERSION: $VBOX_INSTALLED_VERSION :: APT_VBOX_VERSION_FULL: $APT_VBOX_VERSION_FULL"
+	
 	eval $LOGUE
 }
 
@@ -1856,7 +1907,7 @@ install_vbox_module()
 		ose)
 			preinstall_cleanup # get rid of previous modules
 			# then reset version information
-			set_installed_vbox_version
+			get_vbox_installed_version
 			local vbs="virtualbox$APT_VBOX_VERSION_FULL-ose-source"
 			local vbo="virtualbox$APT_VBOX_VERSION_FULL-ose"
 			local modDebName="virtualbox-ose$APT_VBOX_VERSION_FULL-"
@@ -1864,6 +1915,7 @@ install_vbox_module()
 			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
 			local modDeb=$( ls $modDebPath 2> /dev/null )
+			local vboxSlhMod=''
 	
 			# we'll only get the source if we need to build the module
 			# I'm going to try to force the update as well, since otherwise users
@@ -1874,11 +1926,12 @@ install_vbox_module()
 				install_package "$vbo $vbs"
 		# 	fi
 			# set it again in case the stuff changed
-			set_installed_vbox_version
+			get_vbox_installed_version
 	
 			# we need to check that the kernel module version matches the installed version:
 			# that means it must have the right vbox version number in the deb string
-			local vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
+			if [ -n "$VBOX_INSTALLED_VERSION" ];then
+				vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
 	
 			# note: here we have to make sure that the installed stuff is the same version
 			# as the slh prebuilt modules. If not, we'll simply make the modules manually
@@ -1899,11 +1952,15 @@ install_vbox_module()
 				fi
 	# 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
 				modprobe $vbdv
+				success='true'
+			else
+				error_handler 186 "$vbo"
+			fi
 	# 		else
 	# 			echo "${M}Kernel Module ${C}$vbdv${M} is already installed...${N}"
 	# 			log_function_data "Kernel Module $vbdv is already installed..."
 	# 		fi
-			success='true'
+			
 			;;
 		non-ose)
 			local nonOse="virtualbox$APT_VBOX_VERSION_FULL"
@@ -1918,8 +1975,7 @@ install_vbox_module()
 				# dpkg-reconfigure $nonOse
 				success='true'
 			else
-				echo "${C}$nonOse${E} does not appear to be installed, please install it using the menu options."
-				echo "${S}You cannot build the module without having first installed the non-ose vbox!${N}"
+				error_handler 186 "$nonOse"
 			fi
 			;;
 	esac
@@ -2010,8 +2066,7 @@ add_vbox_user()
 install_vbox_addons()
 {
 	eval $LOGPS
-	# need to make sure that for non-ose it's set as well
-	set_installed_vbox_version
+	
 	local vboxLib='/usr/lib/virtualbox/' vboxAddDir='additions'
 	local vboxAddonFile='VBoxGuestAdditions_'$VBOX_INSTALLED_VERSION'.iso'
 	local vboxAddonName='VBoxGuestAdditions.iso'
