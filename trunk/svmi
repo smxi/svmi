@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.2
-####  Date: October 3 2009
+####  version: 2.5.3
+####  Date: October 4 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1690,7 +1690,7 @@ get_vbox_installed_version()
 	
 	# this should handle virtualbox-2.0-ose; virtualbox-ose; virtualbox-3.0
 	# slice out name and version number
-	local workingVbox=$( dpkg -l | grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|-[0-9]\.[0-9])[[:space:]]' | awk '{print $2 " " $3}'  )
+	local workingVbox=$( dpkg -l | grep -E 'virtualbox-(ose|[0-9]\.[0-9]-ose|[0-9]\.[0-9])[[:space:]]' | awk '{print $2 " " $3}' )
 	
 	if [ -z "$workingVbox" ];then
 		: # do nothing, leave unset for other error handling
