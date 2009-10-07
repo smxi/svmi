@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.5
+####  version: 2.5.6
 ####  Date: October 7 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1858,9 +1858,8 @@ install_vbox_module()
 	local kernelPath='/usr/src/kernel-downloads/'
 	# need to grab all of them, not just the main stuff
 	local success='true'
-
-	echo $LINE
-
+	
+	get_vbox_installed_version
 	case $1 in
 		ose)
 			preinstall_cleanup # get rid of previous modules
@@ -1881,7 +1880,7 @@ install_vbox_module()
 			# that means it must have the right vbox version number in the deb string
 			if [ -n "$VBOX_INSTALLED_VERSION" ];then
 				vboxDownloadedMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
-	
+				echo $LINE
 			# note: here we have to make sure that the installed stuff is the same version
 			# as the slh prebuilt modules. If not, we'll simply make the modules manually
 	
@@ -1897,6 +1896,7 @@ install_vbox_module()
 					if [ "$?" -ne 0 ];then
 						success='false'
 					fi
+				# note that this does not exist as an option but here it is in case it ever does.
 				elif [ -e $vboxInit -a -n "$vboxOse" ];then
 					echo "${S}Running ${C}$vboxInit setup${S} on ${C}$vboxOse${S}...${N}"
 					$vboxInit setup
@@ -1938,11 +1938,11 @@ install_vbox_module()
 		non-ose)
 			local nonOse="virtualbox$APT_VBOX_VERSION_NU"
 			# make sure vbox non ose is installed
-			# /etc/init.d/vboxdrv setup 
-			local nonOseInstalled=$( dpkg -l | grep 'ii' | cut -d ' ' -f 3 | egrep "^$nonOse$" )
+			local nonOseInstalled=$( dpkg -l | awk '{print $2}' | egrep "^$nonOse$" )
 			local vboxInit='/etc/init.d/vboxdrv'
 	
 			if [ -n "$nonOseInstalled" -a -e "$vboxInit"  ];then
+				echo $LINE
 				echo "${S}Running ${C}$vboxInit setup${S} on ${C}$nonOse${S}...${N}"
 				$vboxInit setup
 				# dpkg-reconfigure $nonOse
@@ -1963,6 +1963,8 @@ install_vbox_module()
 		fi
 		modprobe $vbdv
 		echo "${C}$vbdv${S} module should now be up and running.${N}"
+	else
+		echo "${E}There was an error building the vbox module.${N}"
 	fi
 	eval $LOGPE
 	print_hec
