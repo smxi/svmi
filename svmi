@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.4
+####  version: 2.5.5
 ####  Date: October 7 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
@@ -1857,7 +1857,7 @@ install_vbox_module()
 	local vbModLoaded=$( lsmod | grep $vbdv )
 	local kernelPath='/usr/src/kernel-downloads/'
 	# need to grab all of them, not just the main stuff
-	local success=''
+	local success='true'
 
 	echo $LINE
 
@@ -1870,26 +1870,17 @@ install_vbox_module()
 			local vbo="virtualbox$APT_VBOX_VERSION_NU-ose"
 			local modDebName="virtualbox-ose$APT_VBOX_VERSION_NU-"
 			local vboxSource=$( dpkg -l | grep -i $vbs )
+			local vboxOse=$( dpkg -l | grep -i $vbo )
 			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
 			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
 			local modDeb=$( ls $modDebPath 2> /dev/null )
-			local vboxSlhMod=''
-	
-			# we'll only get the source if we need to build the module
-			# I'm going to try to force the update as well, since otherwise users
-			# will have an unmatched vbox versioning
-		# 	if [ -z "$vboxSource" -o -z "$vboxSlhMod" ]
-		# 	then
-				echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
-				install_package "$vbo $vbs"
-		# 	fi
-			# set it again in case the stuff changed
-			get_vbox_installed_version
-	
+			local vboxDownloadedMod=''
+			local vboxInit='/etc/init.d/vboxdrv-ose'
+
 			# we need to check that the kernel module version matches the installed version:
 			# that means it must have the right vbox version number in the deb string
 			if [ -n "$VBOX_INSTALLED_VERSION" ];then
-				vboxSlhMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
+				vboxDownloadedMod=$( echo $modDeb | grep $VBOX_INSTALLED_VERSION )
 	
 			# note: here we have to make sure that the installed stuff is the same version
 			# as the slh prebuilt modules. If not, we'll simply make the modules manually
@@ -1897,20 +1888,44 @@ install_vbox_module()
 			# since we have to be able to update modules actively, I'm removing the test for
 			# loaded, that triggers a condition that requires running module install two times
 			# if the old module isn't working right, or is for wrong vbox version
-	# 		if [ -z "$vbModLoaded" ]
-	# 		then
-				if [ -z "$modDeb" -o -z "$vboxSlhMod" ];then
+			# 	if [ -z "$vbModLoaded" ]
+			# 	then
+				if [ -n "$modDeb" -a -n "$vboxDownloadedMod" ];then
+					echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
+					log_function_data "Installing prebuilt vbox kernel modules: $modDeb"
+					dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
+					if [ "$?" -ne 0 ];then
+						success='false'
+					fi
+				elif [ -e $vboxInit -a -n "$vboxOse" ];then
+					echo "${S}Running ${C}$vboxInit setup${S} on ${C}$vboxOse${S}...${N}"
+					$vboxInit setup
+					if [ "$?" -ne 0 ];then
+						success='false'
+					fi
+				else
+					# we'll only get the source if we need to build the module
+					# I'm going to try to force the update as well, since otherwise users
+					# will have an unmatched vbox versioning
+					# 	if [ -z "$vboxSource" -o -z "$vboxDownloadedMod" ]
+					# 	then
+					
+					echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
+					install_package "$vbo $vbs"
+					# 	fi
+					# set it again in case the stuff changed
+					get_vbox_installed_version
 					echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
 					log_function_data "Building $vbdv module now and running modprobe..."
 					m-a a-i $vbs || error_handler 197 $vbdv
-				else
-					echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
-					log_function_data "Installing prebuilt slh vbox kernel modules: $modDeb"
-					dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
+					if [ "$?" -ne 0 ];then
+						success='false'
+					fi
 				fi
-	# 			echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
-				modprobe $vbdv
-				success='true'
+			# 		echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
+				if [ "$success" == 'true' ];then
+					modprobe $vbdv
+				fi
 			else
 				error_handler 186 "$vbo"
 			fi
@@ -1931,7 +1946,9 @@ install_vbox_module()
 				echo "${S}Running ${C}$vboxInit setup${S} on ${C}$nonOse${S}...${N}"
 				$vboxInit setup
 				# dpkg-reconfigure $nonOse
-				success='true'
+				if [ "$?" -ne 0 ];then
+					success='false'
+				fi
 			else
 				error_handler 186 "$nonOse"
 			fi
