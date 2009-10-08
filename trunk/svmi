@@ -1857,7 +1857,7 @@ install_vbox_module()
 	local vbModLoaded=$( lsmod | grep $vbdv )
 	local kernelPath='/usr/src/kernel-downloads/'
 	# need to grab all of them, not just the main stuff
-	local success='true'
+	local success='false'
 	
 	get_vbox_installed_version
 	case $1 in
@@ -1893,15 +1893,15 @@ install_vbox_module()
 					echo "${S}Installing prebuilt vbox kernel module from kernel download directory: ${C}$kernelPath$normalizedCurrentKernel${N}"
 					log_function_data "Installing prebuilt vbox kernel modules: $modDeb"
 					dpkg -i $modDeb 2>> $LOG_FILE 2>&1 || error_handler 191 $modDeb
-					if [ "$?" -ne 0 ];then
-						success='false'
+					if [ "$?" -eq 0 ];then
+						success='true'
 					fi
 				# note that this does not exist as an option but here it is in case it ever does.
 				elif [ -e $vboxInit -a -n "$vboxOse" ];then
 					echo "${S}Running ${C}$vboxInit setup${S} on ${C}$vboxOse${S}...${N}"
 					$vboxInit setup
-					if [ "$?" -ne 0 ];then
-						success='false'
+					if [ "$?" -eq 0 ];then
+						success='true'
 					fi
 				else
 					# we'll only get the source if we need to build the module
@@ -1918,8 +1918,8 @@ install_vbox_module()
 					echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
 					log_function_data "Building $vbdv module now and running modprobe..."
 					m-a a-i $vbs || error_handler 197 $vbdv
-					if [ "$?" -ne 0 ];then
-						success='false'
+					if [ "$?" -eq 0 ];then
+						success='true'
 					fi
 				fi
 			# 		echo "${S}Ignore this error message if you see it, it's meaningless: ${C}FATAL: Module vboxdrv not found.${N}"
@@ -1946,8 +1946,8 @@ install_vbox_module()
 				echo "${S}Running ${C}$vboxInit setup${S} on ${C}$nonOse${S}...${N}"
 				$vboxInit setup
 				# dpkg-reconfigure $nonOse
-				if [ "$?" -ne 0 ];then
-					success='false'
+				if [ "$?" -eq 0 ];then
+					success='true'
 				fi
 			else
 				error_handler 186 "$nonOse"
