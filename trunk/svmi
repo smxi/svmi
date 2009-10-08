@@ -1867,7 +1867,7 @@ install_vbox_module()
 			get_vbox_installed_version
 			local vbs="virtualbox$APT_VBOX_VERSION_NU-ose-source"
 			local vbo="virtualbox$APT_VBOX_VERSION_NU-ose"
-			local modDebName="virtualbox-ose$APT_VBOX_VERSION_NU-"
+			local modDebName="virtualbox$APT_VBOX_VERSION_NU-ose-"
 			local vboxSource=$( dpkg -l | grep -i $vbs )
 			local vboxOse=$( dpkg -l | grep -i $vbo )
 			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
