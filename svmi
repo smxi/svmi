@@ -1913,8 +1913,6 @@ install_vbox_module()
 					echo "${S}Updating ${C}$vbo $vbs${S} now to make sure versions match...${N}"
 					install_package "$vbo $vbs"
 					# 	fi
-					# set it again in case the stuff changed
-					get_vbox_installed_version
 					echo "${S}Building ${C}$vbdv${S} module now and running modprobe...${N}"
 					log_function_data "Building $vbdv module now and running modprobe..."
 					m-a a-i $vbs || error_handler 197 $vbdv
