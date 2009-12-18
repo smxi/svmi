@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.10
-####  Date: December 2 2009
+####  version: 2.5.11
+####  Date: December 18 2009
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2009
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -206,14 +206,15 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
-VBOX_PACKAGE_NO='55467'
-VBOX_VERSION='3.1.0'
+VBOX_PACKAGE_NO='56127'
+VBOX_VERSION='3.1.2'
+# http://.../3.1.2/virtualbox-3.1_3.1.2-56127_Debian_lenny_amd64.deb
 # http://.../3.1.0/virtualbox-3.1_3.1.0-55467_Debian_lenny_i386.deb
 # http://.../3.0.12/virtualbox-3.0_3.0.12-54655_Debian_lenny_i386.deb
 
 # 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 1.6.0:30421 1.6.2:31466 1.6.4:33808
 # 2.0.0:36011 2.0.2:36488 2.0.4:38406 2.0.6:39765 2.1.0:41146 2.1.2:41885 2.2.0:45846
-# 2.2.2:46594 3.0.0:49315 3.0.2:49928 3.0.8:53138 3.0.10:54097 3.0.12:54655
+# 2.2.2:46594 3.0.0:49315 3.0.2:49928 3.0.8:53138 3.0.10:54097 3.0.12:54655 3.1.0:55467
 VBOX_PREVIOUS="1.6.6:35336 2.0.6:39765 2.1.4:42893 2.2.4:47978 3.0.12:54655 $VBOX_VERSION:$VBOX_PACKAGE_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
