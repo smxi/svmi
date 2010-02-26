@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.12
-####  Date: February 14 2010
+####  version: 2.5.13
+####  Date: February 26 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -98,7 +98,8 @@ SCRIPT_DOWNLOAD='http://smxi.org/sv/'
 SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
 SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
-VMWARE_INSTALL_PATH='/usr/src/vmware-downloads/'
+USRS='/usr/src/'
+VMWARE_INSTALL_PATH="${USRS}vmware-downloads/"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
@@ -205,7 +206,7 @@ case $KERNEL_THIRD in
 esac
 
 APT_VBOX_VERSION_NU=''
-VBOX_INSTALL_PATH='/usr/src/vbox-downloads/'
+VBOX_INSTALL_PATH="${USRS}vbox-downloads/"
 VBOX_PACKAGE_NO='57640'
 VBOX_VERSION='3.1.4'
 # http://.../3.1.4/virtualbox-3.1_3.1.4-57640_Debian_lenny_i386.deb
@@ -229,6 +230,7 @@ EAA='/etc/apt/apt.conf'
 EAS='/etc/apt/sources.list'
 SCRIPT_HOME='/usr/local/bin'
 SCRIPT_NAME=$( basename $0 )
+SM_KERNEL_DOWNLOADS="${USRS}sm-kernel-downloads"
 SM_VALUES='/usr/local/bin/svmi-values'
 
 CONFIG_FILE='/etc/svmi.conf'
@@ -645,7 +647,7 @@ basic_startup_tests()
 }
 
 # handles bug in stub installer that leaves tempfiles uncleaned
-cleanup_temp_files()
+cleanup_update_files()
 {
 	eval $LOGUS
 	local all_files=""
@@ -656,6 +658,9 @@ cleanup_temp_files()
 	# make sure stuff exists, rm files
 	if [ -n "$all_files" ];then
 		rm -f $all_files
+	fi
+	if [ -d "${USRS}kernel-downloads" ];then
+		mv -f ${USRS}kernel-downloads $SM_KERNEL_DOWNLOADS
 	fi
 	eval $LOGUE
 }
@@ -1855,7 +1860,7 @@ install_vbox_module()
 	local vbdv='vboxdrv'
 	local isEMod=$( cat $EMOD | grep -i $vbdv )
 	local vbModLoaded=$( lsmod | grep $vbdv )
-	local kernelPath='/usr/src/kernel-downloads/'
+	local kernelPath=$SM_KERNEL_DOWNLOADS
 	# need to grab all of them, not just the main stuff
 	local success='false'
 	
@@ -2285,7 +2290,7 @@ get_options "$@"
 if [ "$B_SKIP_FUNCTION" != 'true' ];then
 	basic_startup_tests
 fi
-cleanup_temp_files
+cleanup_update_files
 ### update everything, restart if not run from smxi
 if [ "$SKIP_RESTART" != 'true' -a "$SM_INSTALL" != 'true' -a "$B_SKIP_FUNCTION" != 'true' ];then
 	check_update_script $SCRIPT_NAME "$SCRIPT_DOWNLOAD" 'default server'
