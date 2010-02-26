@@ -659,8 +659,8 @@ cleanup_update_files()
 	if [ -n "$all_files" ];then
 		rm -f $all_files
 	fi
-	if [ -d "${USRS}kernel-downloads" ];then
-		mv -f ${USRS}kernel-downloads $SM_KERNEL_DOWNLOADS
+	if [ ! -d $SM_KERNEL_DOWNLOADS -a -d /usr/src/kernel-downloads ];then
+		mv -f /usr/src/kernel-downloads $SM_KERNEL_DOWNLOADS
 	fi
 	eval $LOGUE
 }
