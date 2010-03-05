@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.15
+####  version: 2.5.16
 ####  Date: March 5 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
@@ -2165,7 +2165,7 @@ show_options()
 # args: $1 - "$@"
 get_options()
 {
-	while getopts ABDhHj:MpP:RSuUvV:Z!: opt
+	while getopts ABhHj:MpP:RSuUvV:Z!: opt
 	do
 		case $opt in
 			A) AUTORUN_ANYANY='true'
@@ -2174,12 +2174,7 @@ get_options()
 			B) AUTORUN_VBOX='true'
 				START_OPTIONS=$START_OPTIONS' -B'
 				;;
-			D) SM_INSTALL='true'
-				S=${CALLER_DEF} # change standard text color to caller standard text
-				BAR=${S}$BA${N}
-				LINE=${S}$LI${N}
-				START_OPTIONS=$START_OPTIONS' -D'
-				;;
+			
 			j)	if [ -n "$( egrep '^[0-4]$' <<< $OPTARG )" ];then
 					SCRIPT_COLORS=$OPTARG
 					# no reason to reset the colors if they are default
@@ -2267,6 +2262,13 @@ get_options()
 						;;
 					12)
 						check_update_script "$SCRIPT_NAME" "$SCRIPT_DOWNLOAD_BRANCH_2" 'svn: branch two server'
+						;;
+					120)
+						SM_INSTALL='true'
+						S=${CALLER_DEF} # change standard text color to caller standard text
+						BAR=${S}$BA${N}
+						LINE=${S}$LI${N}
+						START_OPTIONS=$START_OPTIONS' -D'
 						;;
 					http*)
 						check_update_script "$SCRIPT_NAME" "$OPTARG" 'alt server'
