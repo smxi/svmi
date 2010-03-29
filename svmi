@@ -100,7 +100,7 @@ SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
 USRS='/usr/src/'
 SVMI_DOWNLOADS="${USRS}svmi-downloads/"
-VMWARE_INSTALL_PATH="${SVMI_DOWNLOADS}vmware/"
+VMWARE_INSTALL_PATH="${SVMI_DOWNLOADS}vmware"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
@@ -207,7 +207,7 @@ case $KERNEL_THIRD in
 esac
 
 APT_VBOX_VERSION_NU=''
-VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox/"
+VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox"
 VBOX_PACKAGE_NO='59338'
 VBOX_VERSION='3.1.6'
 # http://.../3.1.6/virtualbox-3.1_3.1.6-59338_Debian_lenny_amd64.deb
@@ -328,7 +328,7 @@ vmplayer_quick_fix()
 	
 	echo $LINE
 	echo "${S}Retrieving patch for $VMPLAYER_NUMBER post install now...${N}"
-	wget $ua -O $VMWARE_INSTALL_PATH/$patchName $patchUrl || error_handler 189
+	wget $ua -O ${VMWARE_INSTALL_PATH}/$patchName $patchUrl || error_handler 189
 	echo "${S}Preparing system for patching now...${N}"
 	if [ -d $dirData ];then
 		cd $dirData
@@ -340,7 +340,7 @@ vmplayer_quick_fix()
 		done
 		rm -f *.tar
 		echo "${S}Applying patch now...${N}"
-		patch -p1 -i $VMWARE_INSTALL_PATH/$patchName 2>> $LOG_FILE 2>&1
+		patch -p1 -i ${VMWARE_INSTALL_PATH}/$patchName 2>> $LOG_FILE 2>&1
 		echo "${S}Running post patch processes...${N}"
 		for i in mblock mci mmon mnet mppuser sock
 		do 
