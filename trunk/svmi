@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.17
-####  Date: March 26 2010
+####  version: 2.5.18
+####  Date: March 29 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -99,7 +99,8 @@ SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
 SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
 USRS='/usr/src/'
-VMWARE_INSTALL_PATH="${USRS}vmware-downloads/"
+SVMI_DOWNLOADS="${USRS}svmi-downloads/"
+VMWARE_INSTALL_PATH="${SVMI_DOWNLOADS}vmware/"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
@@ -206,7 +207,7 @@ case $KERNEL_THIRD in
 esac
 
 APT_VBOX_VERSION_NU=''
-VBOX_INSTALL_PATH="${USRS}vbox-downloads/"
+VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox/"
 VBOX_PACKAGE_NO='59338'
 VBOX_VERSION='3.1.6'
 # http://.../3.1.6/virtualbox-3.1_3.1.6-59338_Debian_lenny_amd64.deb
@@ -672,6 +673,15 @@ cleanup_update_files()
 	fi
 	if [ ! -d $SM_KERNEL_DOWNLOADS -a -d /usr/src/kernel-downloads ];then
 		mv -f /usr/src/kernel-downloads $SM_KERNEL_DOWNLOADS
+	fi
+	if [ ! -d "$SVMI_DOWNLOADS" ];then
+		mkdir $SVMI_DOWNLOADS
+	fi
+	if [ -d /usr/src/vmware-downloads ];then
+		mv -f /usr/src/vmware-downloads $VMWARE_INSTALL_PATH
+	fi
+	if [ -d /usr/src/vbox-downloads ];then
+		mv -f /usr/src/vbox-downloads $VBOX_INSTALL_PATH
 	fi
 	eval $LOGUE
 }
