@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.19
+####  version: 2.5.20
 ####  Date: May 10 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
@@ -210,6 +210,7 @@ APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox"
 VBOX_PACKAGE_NO='61349'
 VBOX_VERSION='3.1.8'
+VBOX_SEPARATOR='~' # random, pointless, change in path components. Absurd. Amateur.
 # http://.../3.1.8/virtualbox-3.1_3.1.8-61349~Debian~lenny_i386.deb
 # http://.../3.1.6/virtualbox-3.1_3.1.6-59338_Debian_lenny_amd64.deb
 # http://.../3.1.4/virtualbox-3.1_3.1.4-57640_Debian_lenny_i386.deb
@@ -221,7 +222,7 @@ VBOX_VERSION='3.1.8'
 # 2.0.0:36011 2.0.2:36488 2.0.4:38406 2.0.6:39765 2.1.0:41146 2.1.2:41885 2.2.0:45846
 # 2.2.2:46594 3.0.0:49315 3.0.2:49928 3.0.8:53138 3.0.10:54097 3.0.12:54655 3.1.0:55467
 # 3.1.2:56127 3.1.4:57640 3.1.6:59338
-VBOX_PREVIOUS="1.6.6:35336 2.0.6:39765 2.1.4:42893 2.2.4:47978 3.0.12:54655 $VBOX_VERSION:$VBOX_PACKAGE_NO"
+VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
@@ -1812,7 +1813,7 @@ install_vbox_non_ose()
 	fi
 
 	local vboxName='virtualbox'$vboxVersionNu
-	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'_Debian_'$1'_'$arch'.deb'
+	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO$VBOX_SEPARATOR'Debian'$VBOX_SEPARATOR$1'_'$arch'.deb'
 	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
 	log_function_data "debName: $debName\nvboxNonOseURL: $vboxNonOseURL"
 
@@ -2233,6 +2234,7 @@ get_options()
 					if [ -n "$( grep "$OPTARG:" <<< $VBOX_PREVIOUS )" ];then
 						VBOX_VERSION="$OPTARG" # assign to main version global
 						VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 2 )
+						VBOX_SEPARATOR=$( echo $VBOX_PREVIOUS | egrep -o "$VBOX_VERSION:[0-9]{5,6}" | cut -d ':' -f 3 )
 						#echo vb pn $VBOX_PACKAGE_NO
 					elif [ -n "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ];then
 						VMPLAYER_NUMBER=$VMPLAYER_NUMBER_PREVIOUS
