@@ -350,7 +350,7 @@ apply_module_fixes()
 								tar cvf $data1 vmmon-only
 								cd $SCRIPT_HOME
 							else
-								echo "${E}Required directory ${C}$data1${E} not detected, unable to patch...${N}"
+								error_handler 184 "$data1"
 							fi
 							;;
 					esac
@@ -619,6 +619,9 @@ error_handler()
 			;;
 		185)
 			errorData="${C}$VMPlayer${E} does not appear to be installed, please install it manually.\nYou must download it from vmware manually, then install it first!"
+			;;
+		184)
+			errorData="Required directory ${C}$errorExtra${E} not detected, unable to patch."
 			;;
 		*)
 			errorData="Unexpected Error !"
@@ -1236,14 +1239,7 @@ vm_main_selector()
 				repeat='true'
 				;;
 			build-vmplayer-module)
-				calculate_vmplayer_number
-				apply_module_fixes 'vmplayer'
-				if [ -n "$VMPLAYER_INSTALLED" ];then
-					build_vmware_module
-				else
-					error_handler 185
-				fi
-				build_vmware_module
+				vmware_module_builder
 				repeat='true'
 				;;
 			$quitContinue)
@@ -1416,13 +1412,7 @@ vmware_main_selector()
 				repeat='true'
 				;;
 			build-vmplayer-module)
-				calculate_vmplayer_number
-				apply_module_fixes 'vmplayer'
-				if [ -n "$VMPLAYER_INSTALLED" ];then
-					build_vmware_module
-				else
-					error_handler 185
-				fi
+				vmware_module_builder
 				repeat='true'
 				;;
 			run-anyany)
@@ -1455,6 +1445,19 @@ vmware_main_selector()
 		vmware_main_selector
 	fi
 	eval $LOGPE
+}
+
+vmware_module_builder()
+{
+	eval $LOGUS
+	calculate_vmplayer_number
+	apply_module_fixes 'vmplayer'
+	if [ -n "$VMPLAYER_INSTALLED" ];then
+		build_vmware_module
+	else
+		error_handler 185
+	fi
+	eval $LOGUE
 }
 
 # args: $1 - type vbox/vmplayer
@@ -1552,7 +1555,9 @@ calculate_vmplayer_number()
 	eval $LOGUS
 	echo $LINE
 	echo -n "${S}Calculating installed ${C}vmplayer${S} number...  ${N}"
-	VMPLAYER_INSTALLED=$( vmplayer --version 2>/dev/null | awk '{print $3}' )
+	# vmware-player          3.1.0.261024
+
+	VMPLAYER_INSTALLED=$( vmware-installer -l 2>/dev/null | grep 'vmware-player' | awk '{print $2}' | cut -d '.' -f 1-3 )
 	if [ -n "$VMPLAYER_INSTALLED" ];then
 		echo "${S}Version: ${C}$VMPLAYER_INSTALLED${N}"
 	else
