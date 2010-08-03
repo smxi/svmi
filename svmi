@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.5.25
-####  Date: June 29 2010
+####  version: 2.6.0
+####  Date: August 3 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -145,6 +145,7 @@ VMWARE_NAME_PREVIOUS='VMware-player'
 VMPLAYER_NUMBER='2.5.3'
 VMPLAYER_BUILD='185404'
 VMWARE_NAME='VMware-Player'
+VMPLAYER_INSTALLED='' # set only if required
 # only for dev/debugging purposes
 VMPLAYER_NUMBER_TESTING=''
 VMPLAYER_BUILD_TESTING=''
@@ -316,6 +317,41 @@ apply_fixes_post_install()
 							# src: http://communities.vmware.com/thread/221724
 							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
 							vmplayer_quick_fix "$modulePatch"
+							;;
+					esac
+					;;
+				
+			esac
+			;;
+	esac
+	eval $LOGUE
+}
+
+apply_module_fixes()
+{
+	eval $LOGUS
+	local modulePatch='' data1='' data2=''
+	
+	case $1 in
+		vbox)
+			:
+			;;
+		vmplayer)
+			case $KERNEL_THIRD in
+				3[56789])
+					case $VMPLAYER_INSTALLED in
+						3.1.*)
+							data1='/usr/lib/vmware/modules/source/vmmon.tar'
+							echo "${S}Running module fix for ${C}$VMPLAYER_INSTALLED${S}...${N}"
+							if [ -e "$data1" ];then
+								cd /tmp
+								tar xvf $data1 -C /tmp
+								perl -pi -e 's,_range,,' vmmon-only/linux/iommu.c
+								tar cvf $data1 vmmon-only
+								cd $SCRIPT_HOME
+							else
+								echo "${E}Required directory ${C}$data1${E} not detected, unable to patch...${N}"
+							fi
 							;;
 					esac
 					;;
@@ -580,6 +616,9 @@ error_handler()
 			;;
 		186)
 			errorData="${C}$errorExtra${E} does not appear to be installed, please install it using the menu options.\nYou cannot build the module without having first installed the $errorExtra!"
+			;;
+		185)
+			errorData="${C}$VMPlayer${E} does not appear to be installed, please install it manually.\nYou must download it from vmware manually, then install it first!"
 			;;
 		*)
 			errorData="Unexpected Error !"
@@ -1197,6 +1236,13 @@ vm_main_selector()
 				repeat='true'
 				;;
 			build-vmplayer-module)
+				calculate_vmplayer_number
+				apply_module_fixes 'vmplayer'
+				if [ -n "$VMPLAYER_INSTALLED" ];then
+					build_vmware_module
+				else
+					error_handler 185
+				fi
 				build_vmware_module
 				repeat='true'
 				;;
@@ -1370,7 +1416,13 @@ vmware_main_selector()
 				repeat='true'
 				;;
 			build-vmplayer-module)
-				build_vmware_module
+				calculate_vmplayer_number
+				apply_module_fixes 'vmplayer'
+				if [ -n "$VMPLAYER_INSTALLED" ];then
+					build_vmware_module
+				else
+					error_handler 185
+				fi
 				repeat='true'
 				;;
 			run-anyany)
@@ -1494,6 +1546,21 @@ uninstall_vm_app()
 ### -------------------------------------------------------------------
 ### vmware functions
 ### -------------------------------------------------------------------
+
+calculate_vmplayer_number()
+{
+	eval $LOGUS
+	echo $LINE
+	echo -n "${S}Calculating installed ${C}vmplayer${S} number...  ${N}"
+	VMPLAYER_INSTALLED=$( vmplayer --version 2>/dev/null | awk '{print $3}' )
+	if [ -n "$VMPLAYER_INSTALLED" ];then
+		echo "${S}Version: ${C}$VMPLAYER_INSTALLED${N}"
+	else
+		echo "${W}No installed version detected${N}"
+	fi
+	log_function_data "$VMPLAYER_INSTALLED"
+	eval $LOGUE
+}
 
 construct_file_name()
 {
