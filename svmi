@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.6.0
-####  Date: August 3 2010
+####  version: 2.6.1
+####  Date: August 18 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -209,9 +209,10 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox"
-VBOX_PACKAGE_NO='63112'
-VBOX_VERSION='3.2.6'
+VBOX_PACKAGE_NO='64453'
+VBOX_VERSION='3.2.8'
 VBOX_SEPARATOR='~' # note random, pointless, change in path components. Typical...
+# http://.../3.2.8/virtualbox-3.2_3.2.8-64453~Debian~squeeze_i386.deb
 # http://.../3.2.6/virtualbox-3.2_3.2.6-63112~Debian~lenny_i386.deb
 # http://.../3.2.4/virtualbox-3.2_3.2.4-62467~Debian~lenny_amd64.deb
 # http://.../3.2.2/virtualbox-3.2_3.2.2-62298~Debian~lenny_i386.deb
@@ -227,7 +228,7 @@ VBOX_SEPARATOR='~' # note random, pointless, change in path components. Typical.
 # 2.0.0:36011 2.0.2:36488 2.0.4:38406 2.0.6:39765 2.1.0:41146 2.1.2:41885 2.2.0:45846
 # 2.2.2:46594 3.0.0:49315 3.0.2:49928 3.0.8:53138 3.0.10:54097 3.0.12:54655 3.1.0:55467
 # 3.1.2:56127 3.1.4:57640 3.1.6:59338 3.1.6:59338:_ 3.1.8:61349:~ 3.2.0:61806:~
-# 3.2.0:61806:~ 3.2.2:62298:~ 3.2.4:62467:~ 3.2.6:62467:~
+# 3.2.0:61806:~ 3.2.2:62298:~ 3.2.4:62467:~ 3.2.6:63112:~ 3.2.8:64453:~ 
 VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 3.1.8:61349:~ $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
@@ -1292,27 +1293,27 @@ vbox_main_selector()
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
 	echo $LINE
-# 	echo "${C}3${S} - ${C}install-vbox-non-ose-etch${S} Installs the ${C}Debian Etch${S} vbox deb."
-# 	echo "    Module is built automatically."
-	echo "${C}3${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-squeeze${S} Installs the ${C}Debian Squeeze${S} vbox deb."
+	echo "    Module is built automatically."
+	echo "${C}4${S} - ${C}install-vbox-non-ose-lenny${S} Installs the ${C}Debian Lenny${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
-	echo "${C}4${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
+	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
-	echo "${C}5${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "${C}6${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
 	echo "    for your currently installed virtualbox version: ${C}$vboxInstalled"
 
 	echo $LINE
-	echo "${C}6${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
+	echo "${C}7${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
 
-	echo "${C}7${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
-	echo "${C}8${S} - ${C}$quitContinue${S}"
+	echo "${C}8${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
+	echo "${C}9${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
+	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-squeeze install-vbox-non-ose-lenny build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1324,8 +1325,8 @@ vbox_main_selector()
 				install_vbox_module ose
 				repeat='true'
 				;;
-			install-vbox-non-ose-etch)
-				install_vbox 'non-ose' 'etch'
+			install-vbox-non-ose-squeeze)
+				install_vbox 'non-ose' 'squeeze'
 				repeat='true'
 				;;
 			install-vbox-non-ose-lenny)
@@ -1809,7 +1810,7 @@ get_vbox_installed_version()
 }
 
 # create and install vbox module:
-# $1 is ose/non-ose; $2 - lenny/etch
+# $1 is ose/non-ose; $2 - lenny/squeeze
 install_vbox()
 {
 	eval $LOGPS
@@ -1875,7 +1876,7 @@ install_vbox()
 	print_hec
 }
 
-# args: $1 - etch/lenny
+# args: $1 - squeeze/lenny
 install_vbox_non_ose()
 {
 	eval $LOGPS
