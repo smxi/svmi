@@ -1,9 +1,9 @@
 #!/bin/bash
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
-####  Only use for Debian Sid, Testing and sidux, no support for any other distro
-####  version: 2.6.1
-####  Date: August 18 2010
+####  Only use for Debian Sid, Testing and Stable, no support for any other distro
+####  version: 2.6.2
+####  Date: September 16 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -63,7 +63,7 @@
 ########################################################################
 
 # script global data
-NON_DEBIAN_PATTERN='(deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
+NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
 
 # options and global data
 APT_TYPE='apt-get'
@@ -1002,47 +1002,6 @@ check_update_script()
 	# have to worry about rechecking and multi downloads etc
 	fi
 }
-# args: $1 string to be normalized. All internal script functions will use this syntax:
-# 2.6.24.2.slh.2-sidux-686 / 2.6.24.2.slh.2-sidux-amd64
-normalize_kernel_string()
-{
-	eval $LOGUS
-	local kernelString=$1 processSlh='' oldSlh='' processedString='' kernelArch=''
-	# first test for the new default .slh. syntax:
-	if [ -n "$( echo $kernelString | egrep '(-slh(64)?-)' )" ];then
-		oldSlh='true'
-	fi
-	if [ -n "$( echo $kernelString | egrep '(2\.6\.[0-9]{2}-2\.6\.[0-9]{2}.*\.slh\.)' )" ];then
-		processSlh='true'
-	fi
-
-	if [ "$oldSlh" == 'true' -o "$processSlh" == 'true' ];then
-		if [ "$processSlh" == 'true' ];then
-			# this syntax is handled here
-			# 2.6.24-2.6.24.1.slh.3-sidux-amd64 2.6.24-2.6.24.1.slh.3-sidux-686
-			# slice out the part after 2.6.24-
-			processedString=$( echo $kernelString | cut -d '-' -f 2-4 )
-		elif [ "$oldSlh" == 'true' ];then
-			kernelArch=$( echo $kernelString | grep 'slh64'  )
-			# set the kernel arch here
-			if [ -n "$kernelArch" ];then
-				kernelArch='amd64'
-			else
-				kernelArch='686'
-			fi
-			# this syntax is handled here
-			# 2.6.23.15-slh-smp-3 2.6.23.15-slh64-smp-3
-			processedString=$( echo $kernelString | sed -r 's/(-slh(64)?-(smp|up)-)/.slh./g' )
-			processedString=$processedString'-sidux-'$kernelArch
-		fi
-	# do not process user custom or already processed strings at all
-	else
-		processedString=$kernelString
-	fi
-
-	echo $processedString
-	eval $LOGUE
-}
 
 print_information()
 {
@@ -1976,7 +1935,7 @@ install_vbox_module()
 			local modDebName="virtualbox$APT_VBOX_VERSION_NU-ose-"
 			local vboxSource=$( dpkg -l | grep -i $vbs )
 			local vboxOse=$( dpkg -l | grep -i $vbo )
-			local normalizedCurrentKernel=$( normalize_kernel_string $CURRENT_KERNEL )
+			local normalizedCurrentKernel=$CURRENT_KERNEL
 			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
 			local modDeb=$( ls $modDebPath 2> /dev/null )
 			local vboxDownloadedMod=''
