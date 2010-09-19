@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.6.2
-####  Date: September 16 2010
+####  version: 2.7.0
+####  Date: September 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -685,9 +685,7 @@ basic_startup_tests()
 
 	### basic execute requirements
 	cd $SCRIPT_HOME
-	if [ "$(whoami)" != 'root' ];then
-		error_handler 252
-	fi
+	check_root
 
 	# this allows users to update in x, for example, to see latest drivers
 	if [ "$FORCE_UPDATE" == 'true' ];then
@@ -705,6 +703,13 @@ basic_startup_tests()
 		SYSTEM_BASE='testing'
 	else
 		SYSTEM_BASE='sid'
+	fi
+}
+
+check_root()
+{
+	if [ "$(whoami)" != 'root' ];then
+		error_handler 252
 	fi
 }
 
@@ -734,6 +739,50 @@ cleanup_update_files()
 		mv -f /usr/src/vbox-downloads $VBOX_INSTALL_PATH
 	fi
 	eval $LOGUE
+}
+
+clean_script_data()
+{
+	check_root
+	cd $SCRIPT_HOME
+	
+	local downloadDirectorySize=''
+	local opt='' options='remove-virtual-machine-downloads  quit' repeat='false'
+	
+	echo $MLINE
+	echo "${M}$SCRIPT_NAME cleanup tool"
+	echo $MLINE
+	echo "${S}Calculating cleanup data....${N}"
+	echo $LINE
+	downloadDirectorySize=$( du -ch $SVMI_DOWNLOADS 2>/dev/null | grep 'total' )
+	echo "${S}The following ${C}$SCRIPT_NAME${S} data exists for possible cleanup in your system"
+	echo "$SVMI_DOWNLOADS: ${C}$downloadDirectorySize${S}"
+	echo $LINE
+	echo "${C}1 - remove-virtual-machine-downloads${S} - Delete the ALL virtual machine driver downloads."
+	echo "${C}2 - quit${S} - Exit now."
+	echo $LINE
+	select opt in $options
+	do
+		case $opt in
+			remove-virtual-machine-downloads)
+				rm -rf $SCRIPT_WORKING_DIR
+				echo "${C}$SVMI_DOWNLOADS${S} deleted. ${C}$downloadDirectorySize${S} cleaned up.${N}"
+				repeat='true'
+				;;
+			quit)
+				echo "${S}Ok, quitting now.${N}"
+				exit 0
+				;;
+			*)	print_error 'opt'
+				repeat='true'
+				;;
+		esac
+		break
+	done
+	
+	if [ "$repeat" == 'true' ];then
+		clean_script_data
+	fi
 }
 
 check_install_tools()
@@ -2188,6 +2237,8 @@ show_options()
 	echo "   Supported vbox non ose versions: $VBOX_VERSIONS"
 	echo "   Supported alternate vmware player: $VMPLAYER_NUMBER_PREVIOUS"
 	echo "   Example: svmi -V 1.5.2 [or] svmi -V 2.0.5"
+	echo "-Y Clean script download and backup files. Shows a list of cleanup actions to carry out."
+	echo "   Can be run in X, as root."
 	echo "-Z Skips connection test. Use this if $SCRIPT_NAME gives you connection failed error but"
 	echo "   you are sure your connection is fine."
 	if [ "$1" == 'full' ];then
@@ -2215,7 +2266,7 @@ show_options()
 # args: $1 - "$@"
 get_options()
 {
-	while getopts ABhHj:MpP:RSuUvV:Z!: opt
+	while getopts ABhHj:MpP:RSuUvV:YZ!: opt
 	do
 		case $opt in
 			A) AUTORUN_ANYANY='true'
@@ -2282,6 +2333,8 @@ get_options()
 					V_ALT_VERSION="$OPTARG" # and set the alt as well
 					START_OPTIONS=$START_OPTIONS" -V $V_ALT_VERSION"
 				fi
+				;;
+			Y)	clean_script_data
 				;;
 			Z) SKIP_CONNECT='true'
 				START_OPTIONS=$START_OPTIONS' -Z'
