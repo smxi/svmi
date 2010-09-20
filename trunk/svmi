@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.0
+####  version: 2.7.1
 ####  Date: September 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
@@ -765,8 +765,12 @@ clean_script_data()
 	do
 		case $opt in
 			remove-virtual-machine-downloads)
-				rm -rf $SCRIPT_WORKING_DIR
-				echo "${C}$SVMI_DOWNLOADS${S} deleted. ${C}$downloadDirectorySize${S} cleaned up.${N}"
+				if [ -d $SVMI_DOWNLOADS ];then
+					rm -rf $SCRIPT_WORKING_DIR
+					echo "${C}$SVMI_DOWNLOADS${S} deleted. ${C}$downloadDirectorySize${S} cleaned up.${N}"
+				else
+					echo "${M}No ${C}$SVMI_DOWNLOADS${M} directory present so nothing deleted.${N}"
+				fi
 				repeat='true'
 				;;
 			quit)
