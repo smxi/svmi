@@ -758,7 +758,7 @@ clean_script_data()
 	echo "${S}The following ${C}$SCRIPT_NAME${S} data exists for possible cleanup in your system"
 	echo "$SVMI_DOWNLOADS: ${C}$downloadDirectorySize${S}"
 	echo $LINE
-	echo "${C}1 - remove-virtual-machine-downloads${S} - Delete the ALL virtual machine driver downloads."
+	echo "${C}1 - remove-virtual-machine-downloads${S} - Delete ALL virtual machine driver downloads."
 	echo "${C}2 - quit${S} - Exit now."
 	echo $LINE
 	select opt in $options
