@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.1
-####  Date: September 19 2010
+####  version: 2.7.2
+####  Date: September 22 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -99,8 +99,8 @@ SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
 SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
 USRS='/usr/src/'
-SVMI_DOWNLOADS="${USRS}svmi-downloads/"
-VMWARE_INSTALL_PATH="${SVMI_DOWNLOADS}vmware"
+SCRIPT_WORKING_DIR="${USRS}svmi-downloads/"
+VMWARE_INSTALL_PATH="${SCRIPT_WORKING_DIR}vmware"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
@@ -208,7 +208,7 @@ case $KERNEL_THIRD in
 esac
 
 APT_VBOX_VERSION_NU=''
-VBOX_INSTALL_PATH="${SVMI_DOWNLOADS}vbox"
+VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}vbox"
 VBOX_PACKAGE_NO='64453'
 VBOX_VERSION='3.2.8'
 VBOX_SEPARATOR='~' # note random, pointless, change in path components. Typical...
@@ -729,8 +729,8 @@ cleanup_update_files()
 	if [ ! -d $SM_KERNEL_DOWNLOADS -a -d /usr/src/kernel-downloads ];then
 		mv -f /usr/src/kernel-downloads $SM_KERNEL_DOWNLOADS
 	fi
-	if [ ! -d "$SVMI_DOWNLOADS" ];then
-		mkdir $SVMI_DOWNLOADS
+	if [ ! -d "$SCRIPT_WORKING_DIR" ];then
+		mkdir $SCRIPT_WORKING_DIR
 	fi
 	if [ -d /usr/src/vmware-downloads ];then
 		mv -f /usr/src/vmware-downloads $VMWARE_INSTALL_PATH
@@ -747,31 +747,37 @@ clean_script_data()
 	cd $SCRIPT_HOME
 	
 	local downloadDirectorySize=''
-	local opt='' options='remove-virtual-machine-downloads  quit' repeat='false'
+	local opt='' repeat='false'
+	local options="remove-virtual-machine-downloads uninstall-$SCRIPT_NAME quit" 
 	
 	echo $MLINE
 	echo "${M}$SCRIPT_NAME cleanup tool"
 	echo $MLINE
 	echo "${S}Calculating cleanup data....${N}"
 	echo $LINE
-	downloadDirectorySize=$( du -ch $SVMI_DOWNLOADS 2>/dev/null | grep 'total' )
+	downloadDirectorySize=$( du -ch $SCRIPT_WORKING_DIR 2>/dev/null | grep 'total' )
 	echo "${S}The following ${C}$SCRIPT_NAME${S} data exists for possible cleanup in your system"
-	echo "$SVMI_DOWNLOADS: ${C}$downloadDirectorySize${S}"
+	echo "$SCRIPT_WORKING_DIR: ${C}$downloadDirectorySize${S}"
 	echo $LINE
 	echo "${C}1 - remove-virtual-machine-downloads${S} - Delete ALL virtual machine driver downloads."
-	echo "${C}2 - quit${S} - Exit now."
+	echo "${C}2 - uninstall-$SCRIPT_NAME${S} - Removes ALL pieces of $SCRIPT_NAME. Cannot be undone."
+	echo "   Will confirm your choice before proceeding."
+	echo "${C}3 - quit${S} - Exit now."
 	echo $LINE
 	select opt in $options
 	do
 		case $opt in
 			remove-virtual-machine-downloads)
-				if [ -d $SVMI_DOWNLOADS ];then
+				if [ -d $SCRIPT_WORKING_DIR ];then
 					rm -rf $SCRIPT_WORKING_DIR
-					echo "${C}$SVMI_DOWNLOADS${S} deleted. ${C}$downloadDirectorySize${S} cleaned up.${N}"
+					echo "${C}$SCRIPT_WORKING_DIR${S} deleted. ${C}$downloadDirectorySize${S} cleaned up.${N}"
 				else
-					echo "${M}No ${C}$SVMI_DOWNLOADS${M} directory present so nothing deleted.${N}"
+					echo "${M}No ${C}$SCRIPT_WORKING_DIR${M} directory present so nothing deleted.${N}"
 				fi
 				repeat='true'
+				;;
+			uninstall-$SCRIPT_NAME)
+				uninstall_script
 				;;
 			quit)
 				echo "${S}Ok, quitting now.${N}"
@@ -786,6 +792,44 @@ clean_script_data()
 	
 	if [ "$repeat" == 'true' ];then
 		clean_script_data
+	fi
+}
+
+uninstall_script()
+{
+	local opt=''
+	local options="yes-uninstall-everything return-main-menu"
+	echo $LINE
+	echo "${S}Are you sure you want to totally uninstall ${C}$SCRIPT_NAME${S}"
+	echo "This will remove $SCRIPT_NAME and all its components permanently!"
+	echo $LINE
+	echo "${S}Enter a number for your selection and hit enter"
+	echo $LINE
+	echo "${C}1 - yes-uninstall-everything${S} - Completely uninstall $SCRIPT_NAME and its related."
+	echo "    components, logs, and configurations."
+	echo "${C}2 - return-main-menu${S} - Go back to main menu, skip the uninstall."
+	echo $LINE
+	select opt in $options
+		do
+			case $opt in
+				yes-uninstall-everything)
+					echo "${S}Ok, removing all the pieces now...${N}"
+					rm -f /var/log/${SCRIPT_NAME}*
+					rm -f /etc/logrotate.d/${SCRIPT_NAME}*
+					rm -rf $SCRIPT_WORKING_DIR
+					rm -f $SCRIPT_HOME/${SCRIPT_NAME}*
+					echo "${S}Ok, everything is removed. Exiting since $SCRIPT_NAME is now gone.${N}"
+					exit 0
+					;;
+				return-main-menu)
+					echo "${S}Ok, going back to cleanup menu now.${N}"
+					;;
+			esac
+			break
+	done
+	
+	if [ "$repeat" == 'true' ];then
+		uninstall_script
 	fi
 }
 
@@ -2241,7 +2285,7 @@ show_options()
 	echo "   Supported vbox non ose versions: $VBOX_VERSIONS"
 	echo "   Supported alternate vmware player: $VMPLAYER_NUMBER_PREVIOUS"
 	echo "   Example: svmi -V 1.5.2 [or] svmi -V 2.0.5"
-	echo "-Y Clean script download and backup files. Shows a list of cleanup actions to carry out."
+	echo "-Y Clean script download and backup files. Shows a list of cleanup actions to carry out, including script uninstaller."
 	echo "   Can be run in X, as root."
 	echo "-Z Skips connection test. Use this if $SCRIPT_NAME gives you connection failed error but"
 	echo "   you are sure your connection is fine."
