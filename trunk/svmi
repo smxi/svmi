@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.2
+####  version: 2.7.3
 ####  Date: September 22 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
@@ -99,8 +99,8 @@ SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
 SCRIPT_DOWNLOAD_BRANCH_1='http://svmi.googlecode.com/svn/branches/one/'
 SCRIPT_DOWNLOAD_BRANCH_2='http://svmi.googlecode.com/svn/branches/two/'
 USRS='/usr/src/'
-SCRIPT_WORKING_DIR="${USRS}svmi-downloads/"
-VMWARE_INSTALL_PATH="${SCRIPT_WORKING_DIR}vmware"
+SCRIPT_WORKING_DIR="${USRS}svmi-downloads"
+VMWARE_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vmware"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
@@ -208,7 +208,7 @@ case $KERNEL_THIRD in
 esac
 
 APT_VBOX_VERSION_NU=''
-VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}vbox"
+VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
 VBOX_PACKAGE_NO='64453'
 VBOX_VERSION='3.2.8'
 VBOX_SEPARATOR='~' # note random, pointless, change in path components. Typical...
