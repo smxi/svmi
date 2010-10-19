@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.4
-####  Date: October 12 2010
+####  version: 2.7.5
+####  Date: October 19 2010
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2010
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1439,6 +1439,10 @@ vmware_main_selector()
 	echo $MLINE
 	echo "${S}vmware options are basic, and only support vmware player. To build your vmx files, and the"
 	echo "vmdk images if you don't know how to do that, please use this site: ${C}www.easyvmx.com"
+	echo
+	echo "${S}As of VMPlayer 3.0, $SCRIPT_NAME cannot download and install it because Vmware shutdown."
+	echo "direct downloads. You have to fill in a form to get it, but $SCRIPT_NAME can still rebuild"
+	echo "the kernel modules as usual. You need vmplayer 3.0 or newer for it to run on new kernels."
 	echo
 	echo "${S}As of VMPlayer 2.5.0, the any any patch is no longer needed."
 	echo "I'm leaving any-any options for people with 2.0.5 or older vmware installs for now."
