@@ -2,10 +2,10 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.7
-####  Date: December 23 2010
+####  version: 2.7.8
+####  Date: January 2 2011
 ########################################################################
-####  Copyright (C) Harald Hope 2007-2010
+####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
 ####  the terms of the GNU General Public License as published by the Free Software
 ####  Foundation; either version 3 of the License, or (at your option) any later version.
@@ -910,9 +910,14 @@ check_apt_aptitude()
 			APT_TYPE=$aptPref
 		fi
 		log_function_data "APT_TYPE: $APT_TYPE"
-		if [ "$APT_TYPE" == 'aptitude' ];then
-			WITHOUT_RECOMMENDS='--without-recommends'
-		fi
+		case $APT_TYPE in
+			aptitude)
+				WITHOUT_RECOMMENDS='--without-recommends'
+				;;
+			apt-get)
+				WITHOUT_RECOMMENDS='--no-install-recommends'
+				;;
+		esac
 	fi
 	eval $LOGUE
 }
@@ -951,7 +956,8 @@ get_set_prefs()
 check_package_status()
 {
 	eval $LOGUS
-	local packageVersion='' statusType=''
+	local packageVersion='' statusType='' cacheData=''
+	local poolPackageCount=0
 
 	case $2 in
 		c)	statusType='Candidate:'
@@ -960,7 +966,18 @@ check_package_status()
 			;;
 	esac
 
-	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= packageVersion=$( apt-cache policy $1 2>/dev/null | grep -i "$statusType" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	LC_ALL= LC_CTYPE= LC_MESSAGES= LANG= cacheData="$( apt-cache policy $1 2>/dev/null )"
+	
+	# we need to filter out all cases were the only instance in apt is the locally installed
+	# version, ie:  *** 2.13 0 \ 100 /var/lib/dpkg/status is the only value returned
+	poolPackageCount=$( grep -Es "^[[:space:]]*[0-9]{3}"  <<< "$cacheData" | grep -vcE "^[[:space:]]*100[[:space:]]" )
+	
+	packageVersion=$( grep -i "$statusType" <<< "$cacheData" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	
+	# if either none found, or only a local apt version available, return null
+	if [ "$statusType" == 'Candidate:' -a "$poolPackageCount" -eq 0 ];then
+		packageVersion=''
+	fi
 
 	echo $packageVersion
 	log_function_data "Package Version: $packageVersion"
