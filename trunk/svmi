@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.8
+####  version: 2.7.9
 ####  Date: January 2 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
@@ -972,7 +972,8 @@ check_package_status()
 	# version, ie:  *** 2.13 0 \ 100 /var/lib/dpkg/status is the only value returned
 	poolPackageCount=$( grep -Es "^[[:space:]]*[0-9]{3}"  <<< "$cacheData" | grep -vcE "^[[:space:]]*100[[:space:]]" )
 	
-	packageVersion=$( grep -i "$statusType" <<< "$cacheData" | cut -d ':' -f 2-4 | cut -d ' ' -f2 | grep -iv '\(none\)' )
+	packageVersion=$( awk 'BEGIN {IGNORECASE=1} 
+	/'$statusType'/ && !/\(None\)/ {print $2}' <<< "$cacheData" )
 	
 	# if either none found, or only a local apt version available, return null
 	if [ "$statusType" == 'Candidate:' -a "$poolPackageCount" -eq 0 ];then
@@ -983,6 +984,12 @@ check_package_status()
 	log_function_data "Package Version: $packageVersion"
 	eval $LOGUE
 }
+
+for package in $(xmms nano iceweasel kate vim gimp)
+do
+	time check_install_tools $package i
+	time check_install_tools $package c
+done;exit
 
 # arg: $1 - package names
 install_package()
