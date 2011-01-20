@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.10
-####  Date: January 4 2011
+####  version: 2.7.11
+####  Date: January 20 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -209,9 +209,10 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_PACKAGE_NO='69151'
-VBOX_VERSION='4.0.0'
+VBOX_PACKAGE_NO='69518'
+VBOX_VERSION='4.0.2'
 VBOX_SEPARATOR='~' # note random changes in path components...
+# http://.../4.0.2/virtualbox-4.0_4.0.2-69518~Debian~squeeze_i386.deb
 # http://.../4.0.0/virtualbox-4.0_4.0.0-69151~Debian~squeeze_i386.deb
 # http://.../3.2.12/virtualbox-3.2_3.2.12-68302~Debian~squeeze_amd64.deb
 # http://.../3.2.10/virtualbox-3.2_3.2.10-66523~Debian~squeeze_amd64.deb
@@ -2122,6 +2123,7 @@ install_vbox_module()
 			
 			;;
 		non-ose)
+			# /usr/share/virtualbox/src/vboxhost/vboxdrv/build_in_tmp install KERN_DIR=/usr/src/linux-headers-`uname -r`
 			local nonOse="virtualbox$APT_VBOX_VERSION_NU"
 			# make sure vbox non ose is installed
 			local nonOseInstalled=$( dpkg -l | awk '{print $2}' | egrep "^$nonOse$" )
