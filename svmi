@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.7.11
-####  Date: January 20 2011
+####  version: 2.8.0
+####  Date: February 10 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -91,6 +91,7 @@ V_ALT_VERSION=''
 WITHOUT_RECOMMENDS=''
 
 # system paths etc
+EAA='/etc/apt/apt.conf'
 EAS='/etc/apt/sources.list'
 EDV='/etc/debian_version'
 EMOD='/etc/modules'
@@ -658,20 +659,33 @@ error_handler()
 #print_information
 basic_startup_tests()
 {
+	# set files to ram first, no need to keep reading them
+	local edvContent='' easContent='' eaaContent=''
+	if [ -f "$EDV" ];then
+		edvContent="$( cat $EDV )"
+	fi
+	if [ -f "$EAS" -o -d "$EAS.d" ];then
+		easContent="$( cat $EAS $EAS.d/*.list 2>/dev/null )"
+	fi
+	if [ -f "$EAA" ];then
+		eaaContent="$( cat $EAA )"
+	fi
+
 	# these tests will be improved over time, but are ok for now
-	local isEtch=$( grep -is '^4.' $EDV )
-	local isLenny=$( grep -is '^5.' $EDV )
-	local isSqueeze=$( egrep -is '^(squeeze|6\.)' $EDV )
+	local isEtch=$( grep -is '^4.' <<< "$edvContent" )
+	local isLenny=$( grep -is '^5.' <<< "$edvContent" )
+	local isSqueeze=$( grep -Eis '^(squeeze|6\.)' <<< "$edvContent" )
+	local isWheezy=$( grep -Eis '^(wheezy|7\.)' <<< "$edvContent" )
 
 	# first tests sources
-	local isStable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(stable|lenny|etch)' )
-	local isTesting=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(squeeze|testing)' )
-	local isUnstable=$( egrep -siw '^[[:space:]]*deb' $EAS $EAS.d/*.list | egrep -iv "$NON_DEBIAN_PATTERN" | egrep -icw '(sid|unstable)' )
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|squeeze|lenny|etch)' )
+	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(wheezy|testing)' )
+	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
 
 	# then test conf for default version
-	local isStableDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(stable|etch|lenny)"' $EAA )
-	local isTestingDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(testing|squeeze)"' $EAA )
-	local isUnstableDefault=$( egrep -si 'APT::Default-Release[[:space:]]"(sid|unstable)"' $EAA )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze)"' <<< "$eaaContent" )
+	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|wheezy)"' <<< "$eaaContent" )
+	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 
 	### basic system requirements for this script to run, first so user doesn't
 	### have to be root or out of x to get basic failure information
@@ -698,13 +712,13 @@ basic_startup_tests()
 	fi
 
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ -n "$isEtch" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
+	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			SYSTEM_BASE='etch'
 		else
 			SYSTEM_BASE='stable'
 		fi
-	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isSqueeze" -o "$isTesting" -gt 0 ];then
+	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isWheezy" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 	else
 		SYSTEM_BASE='sid'
