@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.3
-####  Date: May 17 2011
+####  version: 2.8.4
+####  Date: May 27 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -105,11 +105,17 @@ VMWARE_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vmware"
 VMWARE_CONFIG='/usr/bin/vmware-config.pl'
 
 # kernel info
-CURRENT_KERNEL=$(uname -r)
-KERNEL_VERSION=$( uname -r | grep -o -G "2.6.[0-9]*" )
-KERNEL_BASE=$( uname -r | cut -d '.' -f 1-2 ) # like: 2.6
-KERNEL_THREE=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
-KERNEL_THIRD=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
+KERNEL_FULL=$(uname -r)
+
+if [ -n "$( grep -Es '^[3-9]\.' <<< $KERNEL_FULL )" ];then
+	KERNEL_BASE=$( echo $KERNEL_FULL | cut -d '.' -f 1 ) # like: 3
+	KERNEL_NUMBER=$( echo $KERNEL_FULL | cut -d '-' -f 1 | cut -d '.' -f 1-2 ) # like: 3.19
+	KERNEL_MATH=$( echo $KERNEL_FULL | cut -d '-' -f 1 | cut -d '.' -f 2 ) # like: 19
+else
+	KERNEL_BASE=$( uname -r | cut -d '.' -f 1-2 ) # like: 2.6
+	KERNEL_NUMBER=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 1-3 ) # like: 2.6.19
+	KERNEL_MATH=$( uname -r | cut -d '-' -f 1 | cut -d '.' -f 3 ) # like: 19, for math use
+fi
 
 # check for 64 bit first
 if [ -n "$( uname -m | grep -o 'x86_64' )" ];then
@@ -178,7 +184,7 @@ ANYANY_DIR_DASH=''
 ANYANY_FILE_DASH=''
 
 # # # use alternate name and location for 2.6.24
-case $KERNEL_THIRD in
+case $KERNEL_MATH in
 	26)
 		# source url:
 		# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update117c.tar.gz
@@ -287,8 +293,8 @@ apply_fixes_post_install()
 			:
 			;;
 		vmplayer)
-			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_THIRD $KERNEL_THIRD"
-			case $KERNEL_THIRD in
+			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_MATH $KERNEL_MATH"
+			case $KERNEL_MATH in
 				29)
 					case $VMPLAYER_NUMBER in
 						# patch logic: http://communities.vmware.com/thread/192355
@@ -348,7 +354,7 @@ apply_module_fixes()
 			:
 			;;
 		vmplayer)
-			case $KERNEL_THIRD in
+			case $KERNEL_MATH in
 				3[56789])
 					case $VMPLAYER_INSTALLED in
 						3.1.*)
@@ -424,7 +430,7 @@ set_test_data()
 # 		VBOX_INSTALL_PATH="$SCRIPT_HOME"
 		rm -f svmi.log
 # 		SYSTEM_BASE='testing'
-		KERNEL_THIRD=31
+		KERNEL_MATH=31
 :
 	fi
 }
@@ -581,6 +587,9 @@ error_handler()
 			;;
 		247)
 			errorData="Unsupported testing option argument: -! $errorExtra"
+			;;
+		246)
+			errorData="There appears to be parts of virtualbox running. Please shutdown all\nvirtualbox components: Virtualbox Manager, and running guests, then try again."
 			;;
 		# specific install issues, non fatal cases
 		200)
@@ -1215,7 +1224,7 @@ create_log()
 	echo "START $SCRIPT_NAME LOGGING:" >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )" >> $LOG_FILE
-	echo "Installed Kernel: $CURRENT_KERNEL" >> $LOG_FILE
+	echo "Installed Kernel: $KERNEL_FULL" >> $LOG_FILE
 	echo "$SCRIPT_NAME script version: $svmiVersion" >> $LOG_FILE
 	echo "$SCRIPT_NAME start options: $START_OPTIONS" >> $LOG_FILE
 	echo "SYSTEM_BASE: $SYSTEM_BASE" >> $LOG_FILE
@@ -1389,6 +1398,7 @@ vbox_main_selector()
 	echo $LINE
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
+	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}Oracle VM VirtualBox Extension Pack"
 	echo $LINE
 	echo "${C}3${S} - ${C}install-vbox-non-ose-squeeze${S} Installs the ${C}Debian Squeeze${S} vbox deb."
 	echo "    Module is built automatically."
@@ -1834,7 +1844,7 @@ build_vmware_module()
 	
 	if [ -n "$vmModConf" -a -x "$vmModConf" ];then
 		echo $LINE
-		echo "${S}Building Vmware module for your ${C}$CURRENT_KERNEL${S} kernel now...${N}"
+		echo "${S}Building Vmware module for your ${C}$KERNEL_FULL${S} kernel now...${N}"
 		vmware-modconfig --console --install-all 
 		errorReturn=$?
 		log_function_data "vmware-modconfig returned: $errorReturn"
@@ -1943,12 +1953,14 @@ install_vbox()
 	fi
 	log_function_data "To remove: $toRemove"
 	log_function_data "To install: $toInstall"
-
+	
+	if [ -n "$( ps aux | grep -is 'virtualbox' | grep -v 'grep' )"  ];then
+		error_handler 246
+	fi
 	if [ "$B_SKIP_FUNCTION" != 'true' ];then
 		remove_package "$toRemove" 'loop'
 		install_package "$toInstall"
 	fi
-	
 	
 	case $1 in
 		# cram in the qt stuff that's required for display if missing, 
@@ -1990,9 +2002,11 @@ install_vbox_non_ose()
 	if [ -n "$( egrep '^[2-6]\.' <<< $VBOX_VERSION )" ];then
 		vboxVersionNu="-$( egrep -o '^[2-6]\.[0-9]' <<< $VBOX_VERSION )"
 	fi
-
+	local vboxVersion=''
 	local vboxName='virtualbox'$vboxVersionNu
 	local debName=$vboxName'_'$VBOX_VERSION'-'$VBOX_PACKAGE_NO$VBOX_SEPARATOR'Debian'$VBOX_SEPARATOR$1'_'$arch'.deb'
+	local vboxExtensionPack='Oracle_VM_VirtualBox_Extension_Pack-'$VBOX_VERSION'-'$VBOX_PACKAGE_NO'.vbox-extpack'
+	local vboxExtPackURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$vboxExtensionPack
 	local vboxNonOseURL=$VBOX_DOWNLOAD_SERVER$VBOX_VERSION'/'$debName
 	log_function_data "debName: $debName\nvboxNonOseURL: $vboxNonOseURL"
 
@@ -2005,11 +2019,28 @@ install_vbox_non_ose()
 		echo "${S}Downloading package ${C}$debName${S}...${N}"
 		wget -O $debName $vboxNonOseURL
 		if [ "$?" -gt 0 ];then
+			echo "${M}Removing failed package remnants from bad download...${N}"
+			rm -f $debName
 			error_handler 190 "$debName"
 			downloadError=1
 		fi
 	else
 		echo "${S}Using previously downloaded package: ${C}$debName${N}"
+	fi
+	if [ -n "$( grep -Es '^4-9' <<< $VBOX_VERSION )" ];then
+		if [ ! -f $vboxExtensionPack ];then
+			echo "${S}Downloading package ${C}$vboxExtensionPack${S}...${N}"
+			wget -O $vboxExtensionPack $vboxExtPackURL
+			if [ "$?" -gt 0 ];then
+				#error_handler 190 "$vboxExtensionPack"
+				downloadError=0 # going to not worry about this for now
+				echo "${W}Error: $vboxExtensionPack failed to download, continuing anyway.${N}"
+				echo "${M}Removing failed package remnants from bad download...${N}"
+				rm -f $vboxExtensionPack
+			fi
+		else
+			echo "${S}Using previously downloaded package: ${C}$vboxExtensionPack${N}"
+		fi
 	fi
 
 	if [ -s "$debName" -a "$downloadError" -eq 0 ];then
@@ -2030,6 +2061,21 @@ install_vbox_non_ose()
 		# note that this only runs if the above worked, otherwise shows error
 		case $installError in
 			0)
+				if [ -f $vboxExtensionPack ];then
+					if [ -n "$( type -p VBoxManage )" ];then
+						vboxVersion=$( VBoxManage list extpacks | awk '/Version:/ {print $2}' )
+						if [ -n "$vboxVersion" ];then
+							echo "${S}Removing previously installed Vbox Extension package now...${N}"
+							VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
+							VBoxManage extpack cleanup
+						fi
+					fi
+					echo "${S}Installing the Vbox Extension package now...${N}"
+					vboxmanage extpack install $vboxExtensionPack
+					if [ "$?" -gt 0 ];then
+						echo "${W}Error: $vboxExtensionPack failed to install, continuing anyway.${N}"
+					fi
+				fi
 				echo "${S}Please note: ${C}virtualbox non-ose${S} version is started with the command: ${C}VirtualBox${S}"
 				echo "(Note uppercase ${C}V${S} and ${C}B${S})"
 				echo "${C}virtualbox${S} (lowercase ${C}v${S} and ${C}b${S}) is the ${C}virtualbox-ose${S} start command.${N}"
@@ -2077,7 +2123,7 @@ install_vbox_module()
 			local modDebName="virtualbox$APT_VBOX_VERSION_NU-ose-"
 			local vboxSource=$( dpkg -l | grep -i $vbs )
 			local vboxOse=$( dpkg -l | grep -i $vbo )
-			local normalizedCurrentKernel=$CURRENT_KERNEL
+			local normalizedCurrentKernel=$KERNEL_FULL
 			local modDebPath=$kernelPath$normalizedCurrentKernel'/'$modDebName'*.deb'
 			local modDeb=$( ls $modDebPath 2> /dev/null )
 			local vboxDownloadedMod=''
