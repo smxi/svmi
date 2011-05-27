@@ -2027,7 +2027,7 @@ install_vbox_non_ose()
 	else
 		echo "${S}Using previously downloaded package: ${C}$debName${N}"
 	fi
-	if [ -n "$( grep -Es '^4-9' <<< $VBOX_VERSION )" ];then
+	if [ -n "$( grep -Es '^[4-9]' <<< $VBOX_VERSION )" ];then
 		if [ ! -f $vboxExtensionPack ];then
 			echo "${S}Downloading package ${C}$vboxExtensionPack${S}...${N}"
 			wget -O $vboxExtensionPack $vboxExtPackURL
