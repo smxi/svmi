@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.4
-####  Date: May 27 2011
+####  version: 2.8.5
+####  Date: May 29 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -184,33 +184,40 @@ ANYANY_DIR_DASH=''
 ANYANY_FILE_DASH=''
 
 # # # use alternate name and location for 2.6.24
-case $KERNEL_MATH in
-	26)
-		# source url:
-		# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update117c.tar.gz
-		# author blog:
-		# http://opensuse-linux-blog.blogspot.com/2008/07/how-to-install-vmware-in-2626-linux.html#links
-		ANYANY_PREFIX='http://smxi.org/sv/patches/'
-		#ANYANY_Z='.tgz' # note, moving to 'd' patch from 'c'
-		ANYANY_ALT='d'
-		ANYANY_NUMBER=117
-		#ANYANY_FILE_DASH=''
+case $KERNEL_BASE in
+	2.6)
+		case $KERNEL_MATH in
+			26)
+				# source url:
+				# http://groups.google.com/group/vmkernelnewbies/web/vmware-any-any-update117c.tar.gz
+				# author blog:
+				# http://opensuse-linux-blog.blogspot.com/2008/07/how-to-install-vmware-in-2626-linux.html#links
+				ANYANY_PREFIX='http://smxi.org/sv/patches/'
+				#ANYANY_Z='.tgz' # note, moving to 'd' patch from 'c'
+				ANYANY_ALT='d'
+				ANYANY_NUMBER=117
+				#ANYANY_FILE_DASH=''
+				;;
+			25)
+				# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
+				# vmware-any-any-update-116.tgz
+				ANYANY_PREFIX='http://download.rsbac.org/tmp/'
+				#ANYANY_Z='.tgz'
+				#ANYANY_ALT=''
+				ANYANY_NUMBER=117
+				#ANYANY_FILE_DASH=''
+				;;
+			24)
+				# http://blog.creonfx.com/temp/vmware-any-any-update-116.tgz
+				ANYANY_PREFIX='http://smxi.org/sv/patches/'
+				ANYANY_Z='.tgz'
+				ANYANY_ALT='a'
+				ANYANY_NUMBER=115
+				;;
+		esac
 		;;
-	25)
-		# http://download.rsbac.org/tmp/vmware-any-any-update117.tar.gz
-		# vmware-any-any-update-116.tgz
-		ANYANY_PREFIX='http://download.rsbac.org/tmp/'
-		#ANYANY_Z='.tgz'
-		#ANYANY_ALT=''
-		ANYANY_NUMBER=117
-		#ANYANY_FILE_DASH=''
-		;;
-	24)
-		# http://blog.creonfx.com/temp/vmware-any-any-update-116.tgz
-		ANYANY_PREFIX='http://smxi.org/sv/patches/'
-		ANYANY_Z='.tgz'
-		ANYANY_ALT='a'
-		ANYANY_NUMBER=115
+	3)
+		: # nothing yet
 		;;
 esac
 
@@ -294,50 +301,56 @@ apply_fixes_post_install()
 			;;
 		vmplayer)
 			log_function_data "VMPLAYER_NUMBER: $VMPLAYER_NUMBER - KERNEL_MATH $KERNEL_MATH"
-			case $KERNEL_MATH in
-				29)
-					case $VMPLAYER_NUMBER in
-						# patch logic: http://communities.vmware.com/thread/192355
-						# patch src: http://communities.vmware.com//message/1213099
-						# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
-						2.5.1)
-							modulePatch='vmware-modules-2.6.29-2.5.1-2.patch'
-							vmplayer_quick_fix "$modulePatch"
+			case $KERNEL_BASE in
+				2.6)
+					case $KERNEL_MATH in
+						29)
+							case $VMPLAYER_NUMBER in
+								# patch logic: http://communities.vmware.com/thread/192355
+								# patch src: http://communities.vmware.com//message/1213099
+								# patch url:http://communities.vmware.com/servlet/JiveServlet/download/1213099-20834/vmware-modules-2.6.29.patch.gz  
+								2.5.1)
+									modulePatch='vmware-modules-2.6.29-2.5.1-2.patch'
+									vmplayer_quick_fix "$modulePatch"
+									;;
+								2.5.2)
+									#patch src: http://communities.vmware.com/thread/203231
+									modulePatch='vmware-modules-2.6.29-2.5.2-1.patch'
+									vmplayer_quick_fix "$modulePatch"
+									;;
+							esac
 							;;
-						2.5.2)
-							#patch src: http://communities.vmware.com/thread/203231
-							modulePatch='vmware-modules-2.6.29-2.5.2-1.patch'
-							vmplayer_quick_fix "$modulePatch"
+						30)
+							case $VMPLAYER_NUMBER in
+								# patch source: http://communities.vmware.com/thread/208963
+								2.5.2)
+									#patch src: http://communities.vmware.com/thread/203231
+									# modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
+									# src: http://communities.vmware.com/thread/208963
+									modulePatch='vmware-modules-2.6.30-2.5.2-2.patch'
+									vmplayer_quick_fix "$modulePatch"
+									;;
+		# 						2.5.3)
+		# 							# src: http://communities.vmware.com/thread/221724
+		# 							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
+		# 							vmplayer_quick_fix "$modulePatch"
+		# 							;;
+							esac
+							;;
+						31)
+							case $VMPLAYER_NUMBER in
+								2.5.2)
+									# src: http://communities.vmware.com/thread/221724
+									modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
+									vmplayer_quick_fix "$modulePatch"
+									;;
+							esac
 							;;
 					esac
 					;;
-				30)
-					case $VMPLAYER_NUMBER in
-						# patch source: http://communities.vmware.com/thread/208963
-						2.5.2)
-							#patch src: http://communities.vmware.com/thread/203231
-							# modulePatch='vmware-modules-2.6.30-2.5.2-1.patch'
-							# src: http://communities.vmware.com/thread/208963
-							modulePatch='vmware-modules-2.6.30-2.5.2-2.patch'
-							vmplayer_quick_fix "$modulePatch"
-							;;
-# 						2.5.3)
-# 							# src: http://communities.vmware.com/thread/221724
-# 							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
-# 							vmplayer_quick_fix "$modulePatch"
-# 							;;
-					esac
+				3)
+					: # nothing yet
 					;;
-				31)
-					case $VMPLAYER_NUMBER in
-						2.5.2)
-							# src: http://communities.vmware.com/thread/221724
-							modulePatch='vmware-6.5.2-2.6.29-2.6.31.patch'
-							vmplayer_quick_fix "$modulePatch"
-							;;
-					esac
-					;;
-				
 			esac
 			;;
 	esac
@@ -354,23 +367,30 @@ apply_module_fixes()
 			:
 			;;
 		vmplayer)
-			case $KERNEL_MATH in
-				3[56789])
-					case $VMPLAYER_INSTALLED in
-						3.1.*)
-							data1='/usr/lib/vmware/modules/source/vmmon.tar'
-							echo "${S}Running module fix for ${C}$VMPLAYER_INSTALLED${S}...${N}"
-							if [ -e "$data1" ];then
-								cd /tmp
-								tar xvf $data1 -C /tmp
-								perl -pi -e 's,_range,,' vmmon-only/linux/iommu.c
-								tar cvf $data1 vmmon-only
-								cd $SCRIPT_HOME
-							else
-								error_handler 184 "$data1"
-							fi
+			case $KERNEL_BASE in
+				2.6)
+					case $KERNEL_MATH in
+						3[56789])
+							case $VMPLAYER_INSTALLED in
+								3.1.*)
+									data1='/usr/lib/vmware/modules/source/vmmon.tar'
+									echo "${S}Running module fix for ${C}$VMPLAYER_INSTALLED${S}...${N}"
+									if [ -e "$data1" ];then
+										cd /tmp
+										tar xvf $data1 -C /tmp
+										perl -pi -e 's,_range,,' vmmon-only/linux/iommu.c
+										tar cvf $data1 vmmon-only
+										cd $SCRIPT_HOME
+									else
+										error_handler 184 "$data1"
+									fi
+									;;
+							esac
 							;;
 					esac
+					;;
+				3)
+					: # nothing yet
 					;;
 			esac
 			;;
@@ -430,7 +450,8 @@ set_test_data()
 # 		VBOX_INSTALL_PATH="$SCRIPT_HOME"
 		rm -f svmi.log
 # 		SYSTEM_BASE='testing'
-		KERNEL_MATH=31
+# 		KERNEL_MATH=31
+# 		KERNEL_BASE=2.6
 :
 	fi
 }
