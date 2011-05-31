@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.5
-####  Date: May 29 2011
+####  version: 2.8.6
+####  Date: May 30 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -125,7 +125,7 @@ else
 fi
 
 # set some core count dependent data
-CORE_COUNT=$( cat /proc/cpuinfo | egrep -c '^processor' )
+CORE_COUNT=$( cat /proc/cpuinfo | grep -c '^processor' )
 
 INSTALL_TYPE=''
 VMP='vmplayer'
@@ -254,7 +254,7 @@ VBOX_SEPARATOR='~' # note random changes in path components...
 # ::~ ::~ ::~ ::~ ::~ ::~ 
 VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 3.1.8:61349:~ 3.2.12:68302:~ $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR"
 # this is just for cosmetic output of supported versions
-VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | egrep -o '[0-9]\.[0-9]\.[0-9]' )
+VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | grep -Eo '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
 VBOX_INSTALLED_VERSION='' # will be set dynamically
 VBOX_DOWNLOAD_SERVER='http://download.virtualbox.org/virtualbox/'
@@ -889,7 +889,7 @@ uninstall_script()
 check_install_tools()
 {
 	eval $LOGPS
-	local gccVersion=$( egrep -io 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | egrep -o '[4-6]\.[0-9]{1,2}' )
+	local gccVersion=$( grep -Eio 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | grep -Eo '[4-6]\.[0-9]{1,2}' )
 	local ubgv="/usr/bin/gcc-$gccVersion"
 
 	if [ -z "$( check_package_status 'module-assistant' 'i' )" ];then
@@ -924,7 +924,7 @@ check_apt_aptitude()
 {
 	eval $LOGUS
 	local opt='' managers='apt-get aptitude quit'
-	local aptPref=$( get_set_prefs 'get' 'apt-type' | cut -d '=' -f 2 | egrep '^(apt-get|aptitude)$' )
+	local aptPref=$( get_set_prefs 'get' 'apt-type' | cut -d '=' -f 2 | grep -E  '^(apt-get|aptitude)$' )
 
 	if [ -f /var/log/aptitude ];then
 		if [ -z "$aptPref" ];then
@@ -1119,7 +1119,7 @@ check_update_script()
 	local fileNameTemp="$( mktemp -p $SCRIPT_HOME/ $1.XXXXXXXXXX )"
 	local isGood='' downloadUrl=$2 extraText='' uArgs='up' ua="-U s-tools/$SCRIPT_NAME"
 
-	if [ -n "$( egrep '(dev|svn|alt)' <<< $3 )" ];then
+	if [ -n "$( grep -E '(dev|svn|alt)' <<< $3 )" ];then
 		extraText="${C}$3:\n$2${S}"
 	else
 		extraText="${C}$3${S}"
@@ -1174,9 +1174,9 @@ check_update_script()
 print_information()
 {
 	eval $LOGPS
-	local scriptVersion=$( egrep -o -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
+	local scriptVersion=$( grep -Eo -m 1 "(version:).*" $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2 )
 	#echo 'sv:' $scriptVersion
-	local scriptDate=$( egrep -o -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
+	local scriptDate=$( grep -Eo -m 1 '(Date:).*' $SCRIPT_HOME/$SCRIPT_NAME | cut -d ' ' -f 2-4 )
 	local vmPlayer=''
 	if [ -e /usr/bin/vmplayer ];then
 		# vmPV=$( vmplayer -v )
@@ -1965,7 +1965,7 @@ install_vbox()
 		# libqtcore4 libqtgui4
 		if [ "$APT_TYPE" == 'apt-get' ];then
 			toInstall='libidl0 adduser'
-			if [ -n "$( egrep '^[2-6]\.' <<< $VBOX_VERSION )" ];then
+			if [ -n "$( grep -E '^[2-6]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqtcore4 libqtgui4"
 			fi
 		else
@@ -2020,8 +2020,8 @@ install_vbox_non_ose()
 		arch='amd64'
 	fi
 	# set to null for 1.x.x versions
-	if [ -n "$( egrep '^[2-6]\.' <<< $VBOX_VERSION )" ];then
-		vboxVersionNu="-$( egrep -o '^[2-6]\.[0-9]' <<< $VBOX_VERSION )"
+	if [ -n "$( grep -E '^[2-6]\.' <<< $VBOX_VERSION )" ];then
+		vboxVersionNu="-$( grep -Eo '^[2-6]\.[0-9]' <<< $VBOX_VERSION )"
 	fi
 	local vboxVersion=''
 	local vboxName='virtualbox'$vboxVersionNu
@@ -2211,7 +2211,7 @@ install_vbox_module()
 			# /usr/share/virtualbox/src/vboxhost/vboxdrv/build_in_tmp install KERN_DIR=/usr/src/linux-headers-`uname -r`
 			local nonOse="virtualbox$APT_VBOX_VERSION_NU"
 			# make sure vbox non ose is installed
-			local nonOseInstalled=$( dpkg -l | awk '{print $2}' | egrep "^$nonOse$" )
+			local nonOseInstalled=$( dpkg -l | awk '{print $2}' | grep -E "^$nonOse$" )
 			local vboxInit='/etc/init.d/vboxdrv'
 	
 			if [ -n "$nonOseInstalled" -a -e "$vboxInit"  ];then
@@ -2257,7 +2257,7 @@ preinstall_cleanup()
 		rmmod vboxdrv 1>> $LOG_FILE 2>> $LOG_FILE
 	fi
 
-	previousVbm=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | egrep '(virtualbox-modules|virtualbox-[2-9]..-modules)' )
+	previousVbm=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep -E '(virtualbox-modules|virtualbox-[2-9]..-modules)' )
 	if [ -n "$previousVbm" ];then
 		dpkg --purge $previousVbm  1>> $LOG_FILE 2>> $LOG_FILE
 	fi
@@ -2267,7 +2267,7 @@ preinstall_cleanup()
 		dpkg --purge $oldVbSource 1>> $LOG_FILE 2>> $LOG_FILE
 	fi
 
-	previousVbox=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | egrep '(virtualbox-ose-modules|virtualbox-[2-9]..-modules)' )
+	previousVbox=$( COLUMNS=200 dpkg -l | cut -d ' ' -f 3 | grep -E '(virtualbox-ose-modules|virtualbox-[2-9]..-modules)' )
 	if [ -n "$previousVbox" ];then
 		dpkg --purge $previousVbox  1>> $LOG_FILE 2>> $LOG_FILE
 	fi
@@ -2296,7 +2296,7 @@ add_vbox_user()
 	# check to see user actually exists, use passwd because someone reported a looping
 	# error here using the test on /home. Tightened test to include : to close name
 	# old test: [ -n "$( ls /home | grep $USER_NAME )" ]
-	userExists=$( egrep -o "^$USER_NAME:" /etc/passwd )
+	userExists=$( grep -Eo "^$USER_NAME:" /etc/passwd )
 
 	if [ "$USER_NAME" != '' ];then
 		log_function_data "Using USER_NAME: $USER_NAME"
@@ -2437,7 +2437,7 @@ get_options()
 				START_OPTIONS=$START_OPTIONS' -B'
 				;;
 			
-			j)	if [ -n "$( egrep '^[0-4]$' <<< $OPTARG )" ];then
+			j)	if [ -n "$( grep -E '^[0-4]$' <<< $OPTARG )" ];then
 					SCRIPT_COLORS=$OPTARG
 					# no reason to reset the colors if they are default
 					if [ "$SCRIPT_COLORS" != 1 ];then
@@ -2454,7 +2454,7 @@ get_options()
 			p) AUTORUN_VMPLAYER='true'
 				START_OPTIONS=$START_OPTIONS' -p'
 				;;
-			P)	if [ -n $( egrep '^(apt-get|aptitude)$' <<< $OPTARG ) ];then
+			P)	if [ -n $( grep -E '^(apt-get|aptitude)$' <<< $OPTARG ) ];then
 					PACKAGE_MANAGER=$OPTARG
 					APT_TYPE=$OPTARG
 					START_OPTIONS=$START_OPTIONS" -P $PACKAGE_MANAGER"
@@ -2482,8 +2482,8 @@ get_options()
 				else
 					if [ -n "$( grep "$OPTARG:" <<< $VBOX_PREVIOUS )" ];then
 						VBOX_VERSION="$OPTARG" # assign to main version global
-						VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | egrep -oE "$VBOX_VERSION:[0-9]{5,6}:[~_]" | cut -d ':' -f 2 )
-						VBOX_SEPARATOR=$( echo $VBOX_PREVIOUS | egrep -oE "$VBOX_VERSION:[0-9]{5,6}:[~_]" | cut -d ':' -f 3 )
+						VBOX_PACKAGE_NO=$( echo $VBOX_PREVIOUS | grep -oE "$VBOX_VERSION:[0-9]{5,6}:[~_]" | cut -d ':' -f 2 )
+						VBOX_SEPARATOR=$( echo $VBOX_PREVIOUS | grep -oE "$VBOX_VERSION:[0-9]{5,6}:[~_]" | cut -d ':' -f 3 )
 						#echo vb pn $VBOX_PACKAGE_NO
 					elif [ -n "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ];then
 						VMPLAYER_NUMBER=$VMPLAYER_NUMBER_PREVIOUS
