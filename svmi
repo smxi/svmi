@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.6
-####  Date: May 30 2011
+####  version: 2.8.7
+####  Date: May 31 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -2427,7 +2427,27 @@ show_options()
 # args: $1 - "$@"
 get_options()
 {
-	while getopts ABhHj:MpP:RSuUvV:YZ!: opt
+	case $1 in
+		--help|-h)
+			if tty > /dev/null ;then
+				show_options
+			else
+				echo "You cannot use the $SCRIPT_NAME help option in an IRC client!"
+				exit 1
+			fi
+			;;
+		--version|-v)
+			# if showing in irc, kill the colors
+			if ! tty > /dev/null ;then
+				SCRIPT_COLORS=0
+				set_script_colors
+			fi
+			print_information
+			exit 0
+			;;
+	esac
+	
+	while getopts ABHj:MpP:RSuUV:YZ!: opt
 	do
 		case $opt in
 			A) AUTORUN_ANYANY='true'
@@ -2472,9 +2492,6 @@ get_options()
 				;;
 			U) FORCE_UPDATE='true'
 				;;
-			v) print_information
-				exit 0
-				;;
 			V) if [ -z "$( grep "$OPTARG:" <<< $VBOX_PREVIOUS )" -a -z "$( grep "^$OPTARG$" <<< $VMPLAYER_NUMBER_PREVIOUS )" ];then
 					echo "${E}The -V option supports either non-ose vbox versions: ${C}$VBOX_VERSIONS"
 					echo "${E}or vmware player previous version: ${C}$VMPLAYER_NUMBER_PREVIOUS${N}"
@@ -2499,8 +2516,6 @@ get_options()
 				;;
 			Z) SKIP_CONNECT='true'
 				START_OPTIONS=$START_OPTIONS' -Z'
-				;;
-			h) show_options
 				;;
 			H)	show_options 'full'
 				;;
