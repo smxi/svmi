@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.9
-####  Date: July 1 2011
+####  version: 2.8.10
+####  Date: July 18 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -223,10 +223,11 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_EXTENSION_NO='72436'
-VBOX_PACKAGE_NO='72479'
-VBOX_VERSION='4.0.10'
+VBOX_EXTENSION_NO='72916'
+VBOX_PACKAGE_NO='72916'
+VBOX_VERSION='4.0.12'
 VBOX_SEPARATOR='~' # note random changes in path components...
+# http://.../4.0.12/virtualbox-4.0_4.0.12-72916~Debian~squeeze_i386.deb
 # http://.../4.0.10/virtualbox-4.0_4.0.10-72479~Debian~squeeze_amd64.deb
 # http://.../4.0.8/virtualbox-4.0_4.0.8-71778~Debian~squeeze_i386.deb
 # http://.../4.0.6/virtualbox-4.0_4.0.6-71344~Debian~squeeze_amd64.deb
@@ -254,7 +255,7 @@ VBOX_SEPARATOR='~' # note random changes in path components...
 # 3.2.0:61806:~ 3.2.2:62298:~ 3.2.4:62467:~ 3.2.6:63112:~ 3.2.8:64453:~ 3.2.10:66523:~
 # 3.2.12:68302:~ 
 # 4.0.2:69518:~:69518 4.0.4:70112:~:70112 4.0.6:71344:~:71344 4.0.8:71778:~:71778 
-# 4.0.10:72479:~:72436 ::~: ::~: ::~: ::~: ::~: 
+# 4.0.10:72479:~:72436 4.0.12:72916:~:72916 ::~: ::~: ::~: ::~: 
 VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 3.1.8:61349:~ 3.2.12:68302:~ $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR:$VBOX_EXTENSION_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | grep -Eo '[0-9]\.[0-9]\.[0-9]' )
