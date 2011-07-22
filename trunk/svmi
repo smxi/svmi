@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.11
-####  Date: July 20 2011
+####  version: 2.8.12
+####  Date: July 22 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -737,8 +737,8 @@ basic_startup_tests()
 	if [ "$( cat /etc/issue | grep -i -c 'buntu' )" -gt 0 ];then
 		error_handler 254
 	fi
-	# double check only 2.6 series kernels
-	if [ "$KERNEL_BASE" != '2.6' ];then
+	# double check only 2.6 or newer series kernels, note double [[ and <
+	if [[ "$KERNEL_BASE" < 2.6 ]];then
 		error_handler 253
 	fi
 
