@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.12
-####  Date: July 22 2011
+####  version: 2.8.13
+####  Date: July 26 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -727,6 +727,15 @@ basic_startup_tests()
 	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|wheezy)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 
+	### basic execute requirements
+	cd $SCRIPT_HOME
+	check_root
+	
+	# this allows users to update in x, for example, to see latest drivers
+	if [ "$FORCE_UPDATE" == 'true' ];then
+		check_update_script $SCRIPT_NAME "$SCRIPT_DOWNLOAD" 'default server'
+	fi
+	
 	### basic system requirements for this script to run, first so user doesn't
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
@@ -740,15 +749,6 @@ basic_startup_tests()
 	# double check only 2.6 or newer series kernels, note double [[ and <
 	if [[ "$KERNEL_BASE" < 2.6 ]];then
 		error_handler 253
-	fi
-
-	### basic execute requirements
-	cd $SCRIPT_HOME
-	check_root
-
-	# this allows users to update in x, for example, to see latest drivers
-	if [ "$FORCE_UPDATE" == 'true' ];then
-		check_update_script $SCRIPT_NAME "$SCRIPT_DOWNLOAD" 'default server'
 	fi
 
 	# set system type. This test will never be perfect, but it's a good approximation
