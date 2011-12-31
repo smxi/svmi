@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.17
-####  Date: December 22 2011
+####  version: 2.8.18
+####  Date: December 30 2011
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2011
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -63,7 +63,7 @@
 ########################################################################
 
 # script global data
-NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
+NON_DEBIAN_PATTERN='(deb-ats|deb-mep|deb-mm|deb-op|deb-sdx|deb-skp|deb-swift|deb-vb|alphagemini|aptosid|byteme|cathbard|debian-multimedia|dotdeb|edevelop|eeepc|freevo|giss.tv|google|java|kanotix|kde|kiberpipa|kplayer|lamaresh|liquorix|lxde|mepis|moblock|opera|noreply|prodeia.de|rarewares|rox4debian|siduction|sidux|skype|swiftfox|tovid|videolan|virtualbox|wine-hq|xadras)'
 
 # options and global data
 APT_TYPE='apt-get'
