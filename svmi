@@ -1327,7 +1327,7 @@ vm_main_selector()
 	echo "rebuild vmware/vbox kernel modules if that's all you need to do."
 	echo $LINE
 	echo "${C}1${S} - ${C}virtualbox-options${S} Downloads, installs, rebuild kernel module, ${C}vbox tools${S}, for"
-	echo "    both ${C}virtualbox non-ose${S} and ${C}virtualbox-ose${S}. Current non-ose: ${C}$VBOX_VERSION${S}."
+	echo "    both ${C}virtualbox non-ose${S} and ${C}virtualbox-ose${S}. Current: ${C}non-ose $VBOX_VERSION${S}."
 	echo "${C}2${S} - ${C}vmware-options${S} Downloads, installs, rebuild kernel module, and a few other things."
 
 	echo $LINE
