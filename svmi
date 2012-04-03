@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.20
-####  Date: April 2 2012
+####  version: 2.8.21
+####  Date: April 3 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1406,8 +1406,6 @@ vbox_main_selector()
 	echo "${S}To install other vbox non-ose/vmware versions, use the ${C}svmi -V <vbox/vmware version>${S} option"
 
 	echo $MLINE
-	echo "${M}Please NOTE: ose means open source edition. Ose and non-ose components are NOT compatible."
-	echo $LINE
 	echo "${C}1${S} - ${C}install-vbox-ose${S} Installs virtualbox-ose. If you need to update modules after installing,"
 	echo "    please run ${C}build-vbox-module-ose${S} as well."
 	echo "${C}2${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules,"
@@ -1417,12 +1415,12 @@ vbox_main_selector()
 	echo $LINE
 	echo "${S}vbox non-ose default install version: ${C}$VBOX_VERSION${S}"
 	echo "Available vbox non-ose versions: ${C}$VBOX_VERSIONS"
-	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}Oracle VM VirtualBox Extension Pack"
+	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}VirtualBox Extension Pack"
 	echo "Also, as of ${C}4.1.6${S}, there is no ${C}Lenny${S} support, so I have removed that option."
 	echo $LINE
 	echo "${C}3${S} - ${C}install-vbox-non-ose-squeeze${S} Installs the ${C}Debian Squeeze${S} vbox deb."
 	echo "    Module is built automatically."
-	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian Lenny${S} vbox deb."
+	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian Wheezy/Sid${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
 	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
