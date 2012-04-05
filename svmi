@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.22
-####  Date: April 4 2012
+####  version: 2.8.23
+####  Date: April 5 2012
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2012
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -1080,7 +1080,7 @@ remove_package()
 			loop)
 				echo $MLINE
 				echo "${M}You will need to remove the following package(s): ${C}$1"
-				echo "${M}in order to proceed with your ${C}$2${M} driver install${N}"
+				echo "${M}in order to proceed with your ${C}VirtualBox${M} install${N}"
 				echo $MLINE
 				for package in $1
 				do
@@ -1939,7 +1939,7 @@ get_vbox_installed_version()
 }
 
 # create and install vbox module:
-# $1 is ose/non-ose; $2 - lenny/wheezy
+# $1 is ose/non-ose; $2 - lenny/squeeze/wheezy + whatever new versions come
 install_vbox()
 {
 	eval $LOGPS
