@@ -1080,7 +1080,7 @@ remove_package()
 			loop)
 				echo $MLINE
 				echo "${M}You will need to remove the following package(s): ${C}$1"
-				echo "${M}in order to proceed with your ${C}VirtualBox${M} install${N}"
+				echo "${M}in order to proceed with your install.${N}"
 				echo $MLINE
 				for package in $1
 				do
