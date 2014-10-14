@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.50
-####  Date: 2014-09-10
+####  version: 2.8.51
+####  Date: 2014-10-14
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -223,10 +223,11 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_EXTENSION_NO='95972'
-VBOX_PACKAGE_NO='95972'
-VBOX_VERSION='4.3.16'
+VBOX_EXTENSION_NO='96516'
+VBOX_PACKAGE_NO='96516'
+VBOX_VERSION='4.3.18'
 VBOX_SEPARATOR='~' # note random changes in path components...
+# 4.3.18-96516
 # 4.3.6-91406 4.3.8-92456 4.3.10-93012 4.3.12-93733 4.3.14-95030  4.3.16-95972
 
 # 4.2.8-83876 4.2.10-84104 4.2.12-84980 4.2.16-86992
