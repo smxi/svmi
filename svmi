@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.56
-####  Date: 2015-05-02
+####  version: 2.8.58
+####  Date: 2015-06-08
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -94,6 +94,7 @@ WITHOUT_RECOMMENDS=''
 EAA='/etc/apt/apt.conf'
 EAS='/etc/apt/sources.list'
 EDV='/etc/debian_version'
+EDVV='/etc/devuan_version'
 EMOD='/etc/modules'
 SCRIPT_DOWNLOAD='http://smxi.org/sv/'
 SCRIPT_DOWNLOAD_DEV='http://techpatterns.com/downloads/distro/'
@@ -708,6 +709,8 @@ basic_startup_tests()
 	local edvContent='' easContent='' eaaContent=''
 	if [ -f "$EDV" ];then
 		edvContent="$( cat $EDV )"
+	elif [ -f "$EDVV" ];then
+		edvContent="$( cat $EDVV )"
 	fi
 	if [ -f "$EAS" -o -d "$EAS.d" ];then
 		easContent="$( cat $EAS $EAS.d/*.list 2>/dev/null )"
@@ -746,7 +749,7 @@ basic_startup_tests()
 	### basic system requirements for this script to run, first so user doesn't
 	### have to be root or out of x to get basic failure information
 	# make sure that it's a debian based system
-	if [ ! -f "$EDV" ];then
+	if [ ! -f "$EDV" -a ! -f "$EDVV" ];then
 		error_handler 255
 	fi
 	# no ubuntu support
