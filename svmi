@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.59
-####  Date: 2015-06-15
+####  version: 2.8.60
+####  Date: 2015-07-03
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -920,6 +920,10 @@ check_install_tools()
 {
 	eval $LOGPS
 	local gccVersion=$( grep -Eio 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | grep -Eo '[4-6]\.[0-9]{1,2}' )
+	# as of gcc-5, gcc and g++ are without decimal
+	if [ -n "$gccVersion" -a -n "$( grep -E '^[5-9]' <<< $gccVersion)" ];then
+		gccVersion=$(grep -Eo '^[5-9]' <<< $gccVersion )
+	fi
 	local ubgv="/usr/bin/gcc-$gccVersion"
 
 	if [ -z "$( check_package_status 'module-assistant' 'i' )" ];then
@@ -936,6 +940,7 @@ check_install_tools()
 		fi
 		export CC=$ubgv
 	else
+		
 		# going to try to update gcc to kernel version first before error exit.
 		if [ -n "$( check_package_status "gcc-$gccVersion" 'c' )" ];then
 			install_package "gcc-$gccVersion"
