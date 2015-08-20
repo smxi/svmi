@@ -3,7 +3,7 @@
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
 ####  version: 2.8.60
-####  Date: 2015-07-03
+####  Date: 2015-08-20
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2014
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -18,7 +18,7 @@
 ####  http://www.gnu.org/licenses/gpl.html
 ########################################################################
 ####  Script URL: http://smxi.org/sv/svmi
-####  Script SVN: http://code.google.com/p/svmi
+####  Script GIT: https://github.com/smxi/svmi
 ####  Script Documentation: http://smxi.org/docs/
 ####  Script Home Forums: http://techpatterns.com/forums/forum-33.html
 ########################################################################
