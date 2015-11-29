@@ -2000,7 +2000,7 @@ install_vbox()
 		# libqtcore4 libqtgui4
 		if [ "$APT_TYPE" == 'apt-get' ];then
 			toInstall='libidl0 adduser'
-			if [ -n "$( grep -E '^[2-6]\.' <<< $VBOX_VERSION )" ];then
+			if [ -n "$( grep -E '^[2-9]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqtcore4 libqtgui4"
 			fi
 		else
@@ -2055,8 +2055,8 @@ install_vbox_non_ose()
 		arch='amd64'
 	fi
 	# set to null for 1.x.x versions
-	if [ -n "$( grep -E '^[2-6]\.' <<< $VBOX_VERSION )" ];then
-		vboxVersionNu="-$( grep -Eo '^[2-6]\.[0-9]' <<< $VBOX_VERSION )"
+	if [ -n "$( grep -E '^[2-9]\.' <<< $VBOX_VERSION )" ];then
+		vboxVersionNu="-$( grep -Eo '^[2-9]\.[0-9]' <<< $VBOX_VERSION )"
 	fi
 	local vboxVersion=''
 	local vboxName='virtualbox'$vboxVersionNu
