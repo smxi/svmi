@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.64
+####  version: 2.8.65
 ####  Date: 2016-02-28
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2015
@@ -224,9 +224,9 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_EXTENSION_NO='104815'
-VBOX_PACKAGE_NO='104815'
-VBOX_VERSION='5.0.12'
+VBOX_EXTENSION_NO='105127'
+VBOX_PACKAGE_NO='105127'
+VBOX_VERSION='5.0.14'
 VBOX_SEPARATOR='~' # note random changes in path components...
 # 4.3.18-96516 4.3.22-98236 4.3.26-98988
 # 4.3.6-91406 4.3.8-92456 4.3.10-93012 4.3.12-93733 4.3.14-95030  4.3.16-95972
@@ -1456,9 +1456,9 @@ vbox_main_selector()
 	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}VirtualBox Extension Pack"
 	echo "Also, as of ${C}4.1.6${S}, there is no ${C}Lenny${S} support, so I have removed that option."
 	echo $LINE
-	echo "${C}3${S} - ${C}install-vbox-non-ose-squeeze${S} Installs the ${C}Debian Squeeze${S} vbox deb."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-jesse${S} Installs the ${C}Debian 8 Jesse${S} vbox deb."
 	echo "    Module is built automatically."
-	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian Wheezy/Sid${S} vbox deb."
+	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy/Sid${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
 	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
@@ -1476,7 +1476,7 @@ vbox_main_selector()
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-squeeze install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
+	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-jesse install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1488,8 +1488,8 @@ vbox_main_selector()
 				install_vbox_module ose
 				repeat='true'
 				;;
-			install-vbox-non-ose-squeeze)
-				install_vbox 'non-ose' 'squeeze'
+			install-vbox-non-ose-jesse)
+				install_vbox 'non-ose' 'jesse'
 				repeat='true'
 				;;
 			install-vbox-non-ose-wheezy)
@@ -1977,7 +1977,7 @@ get_vbox_installed_version()
 }
 
 # create and install vbox module:
-# $1 is ose/non-ose; $2 - lenny/squeeze/wheezy + whatever new versions come
+# $1 is ose/non-ose; $2 - lenny/squeeze/wheezy/jesse + whatever new versions come
 install_vbox()
 {
 	eval $LOGPS
