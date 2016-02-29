@@ -434,7 +434,7 @@ vmplayer_quick_fix()
 		rm -f *.tar
 		echo "${S}Applying patch now...${N}"
 		patch -p1 -i ${VMWARE_INSTALL_PATH}/$patchName 2>> $LOG_FILE 2>&1
-		echo "${S}Running post patch processies...${N}"
+		echo "${S}Running post patch processes...${N}"
 		for i in mblock mci mmon mnet mppuser sock
 		do 
 			tar -cf v$i.tar v$i-only
@@ -930,8 +930,8 @@ check_install_tools()
 	if [ -z "$( check_package_status 'module-assistant' 'i' )" ];then
 		install_package 'module-assistant'
 	fi
-	if [ -z "$( check_package_status 'build-essiential' 'i' )" ];then
-		install_package 'build-essiential'
+	if [ -z "$( check_package_status 'build-essential' 'i' )" ];then
+		install_package 'build-essential'
 	fi
 
 	if [ -x "$ubgv" ];then
