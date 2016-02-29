@@ -729,12 +729,12 @@ basic_startup_tests()
 	local isStretch=$( grep -Eis '^(stretch|9\.)' <<< "$edvContent" )
 	
 	# first tests sources
-	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jesse)' )
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie)' )
 	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stretch|testing)' )
 	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
 	
 	# then test conf for default version
-	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jesse)"' <<< "$eaaContent" )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie)"' <<< "$eaaContent" )
 	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|stretch)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	
@@ -777,8 +777,8 @@ basic_startup_tests()
 			FG_DISTRIB_CODENAME='wheezy' # note: 'stable' breaks the installer
 			SYSTEM_CODENAME='wheezy'
 		elif [ -n "$isJesse" ];then
-			FG_DISTRIB_CODENAME='jesse' # note: 'stable' breaks the installer
-			SYSTEM_CODENAME='jesse'
+			FG_DISTRIB_CODENAME='jessie' # note: 'stable' breaks the installer
+			SYSTEM_CODENAME='jessie'
 		else
 			FG_DISTRIB_CODENAME='stable'
 			SYSTEM_CODENAME='stable'
@@ -1456,7 +1456,7 @@ vbox_main_selector()
 	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}VirtualBox Extension Pack"
 	echo "Also, as of ${C}4.1.6${S}, there is no ${C}Lenny${S} support, so I have removed that option."
 	echo $LINE
-	echo "${C}3${S} - ${C}install-vbox-non-ose-jesse${S} Installs the ${C}Debian 8 Jesse${S} vbox deb."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-jessie${S} Installs the ${C}Debian 8 Jesse${S} vbox deb."
 	echo "    Module is built automatically."
 	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
@@ -1476,7 +1476,7 @@ vbox_main_selector()
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-jesse install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
+	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-jessie install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1488,8 +1488,8 @@ vbox_main_selector()
 				install_vbox_module ose
 				repeat='true'
 				;;
-			install-vbox-non-ose-jesse)
-				install_vbox 'non-ose' 'jesse'
+			install-vbox-non-ose-jessie)
+				install_vbox 'non-ose' 'jessie'
 				repeat='true'
 				;;
 			install-vbox-non-ose-wheezy)
@@ -1977,7 +1977,7 @@ get_vbox_installed_version()
 }
 
 # create and install vbox module:
-# $1 is ose/non-ose; $2 - lenny/squeeze/wheezy/jesse + whatever new versions come
+# $1 is ose/non-ose; $2 - lenny/squeeze/wheezy/jessie + whatever new versions come
 install_vbox()
 {
 	eval $LOGPS
