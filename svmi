@@ -1458,7 +1458,7 @@ vbox_main_selector()
 	echo $LINE
 	echo "${C}3${S} - ${C}install-vbox-non-ose-jesse${S} Installs the ${C}Debian 8 Jesse${S} vbox deb."
 	echo "    Module is built automatically."
-	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy/Sid${S} vbox deb."
+	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
 	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
