@@ -434,7 +434,7 @@ vmplayer_quick_fix()
 		rm -f *.tar
 		echo "${S}Applying patch now...${N}"
 		patch -p1 -i ${VMWARE_INSTALL_PATH}/$patchName 2>> $LOG_FILE 2>&1
-		echo "${S}Running post patch processes...${N}"
+		echo "${S}Running post patch processies...${N}"
 		for i in mblock mci mmon mnet mppuser sock
 		do 
 			tar -cf v$i.tar v$i-only
@@ -776,7 +776,7 @@ basic_startup_tests()
 		elif [ -n "$isWheezy" ];then
 			FG_DISTRIB_CODENAME='wheezy' # note: 'stable' breaks the installer
 			SYSTEM_CODENAME='wheezy'
-		elif [ -n "$isJesse" ];then
+		elif [ -n "$isJessie" ];then
 			FG_DISTRIB_CODENAME='jessie' # note: 'stable' breaks the installer
 			SYSTEM_CODENAME='jessie'
 		else
@@ -930,8 +930,8 @@ check_install_tools()
 	if [ -z "$( check_package_status 'module-assistant' 'i' )" ];then
 		install_package 'module-assistant'
 	fi
-	if [ -z "$( check_package_status 'build-essential' 'i' )" ];then
-		install_package 'build-essential'
+	if [ -z "$( check_package_status 'build-essiential' 'i' )" ];then
+		install_package 'build-essiential'
 	fi
 
 	if [ -x "$ubgv" ];then
@@ -1456,7 +1456,7 @@ vbox_main_selector()
 	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}VirtualBox Extension Pack"
 	echo "Also, as of ${C}4.1.6${S}, there is no ${C}Lenny${S} support, so I have removed that option."
 	echo $LINE
-	echo "${C}3${S} - ${C}install-vbox-non-ose-jessie${S} Installs the ${C}Debian 8 Jesse${S} vbox deb."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-jessie${S} Installs the ${C}Debian 8 Jessie${S} vbox deb."
 	echo "    Module is built automatically."
 	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
