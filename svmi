@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.67
-####  Date: 2016-06-30
+####  version: 2.8.68
+####  Date: 2016-08-19
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2016
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -224,14 +224,15 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_EXTENSION_NO='108355'
-VBOX_PACKAGE_NO='108355'
-VBOX_VERSION='5.0.24'
+VBOX_EXTENSION_NO='110228'
+VBOX_PACKAGE_NO='110228'
+VBOX_VERSION='5.1.4'
 VBOX_SEPARATOR='~' # note random changes in path components...
 # 4.3.18-96516 4.3.22-98236 4.3.26-98988 -
 # 4.3.6-91406 4.3.8-92456 4.3.10-93012 4.3.12-93733 4.3.14-95030  4.3.16-95972
 # 4.2.8-83876 4.2.10-84104 4.2.12-84980 4.2.16-86992
 # 4.1.20-80170 4.1.22-80657 4.2.0-80737 4.2.2-81494 4.2.4-81684 4.2.6-82870
+# http://download.virtualbox.org/virtualbox/5.1.4/virtualbox-5.1_5.1.4-110228~Debian~stretch_amd64.deb
 # http://.../4.3.0/virtualbox-4.3_4.3.0-89960~Debian~wheezy_i386.deb
 # http://.../4.2.18/virtualbox-4.2_4.2.18-88780~Debian~wheezy_i386.deb
 # http://.../4.2.14/virtualbox-4.2_4.2.14-86644~Debian~wheezy_amd64.deb
@@ -265,8 +266,8 @@ VBOX_SEPARATOR='~' # note random changes in path components...
 # 4.3.10:93012:~:93012 4.3.12:93733:~:93733 4.3.14:95030:~:95030 4.3.16:95972:~:95972 4.3.20:96996:~:96996 
 # 4.3.22:98236:~:98236 4.3.24:98716:~:98716 4.3.26:98988:~:98988 4.3.28:100309:~:100309 4.3.30:101610:~:101610
 # 5.0.6:103037:~:103037 5.0.10:104061:~:104061 5.0.12:104815:~:104815 5.0.14:105127:~:105127 
-# 5.0.20:106931:~:106931 5.0.24:108355:~:108355 ::~: ::~: ::~: ::~: 
-VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 3.1.8:61349:~ 3.2.12:68302:~ 4.0.12:72916:~:72916 4.1.22:80657:~:80657 4.2.18:88780:~:88780 4.3.30:101610:~:101610 $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR:$VBOX_EXTENSION_NO"
+# 5.0.20:106931:~:106931 5.0.24:108355:~:108355 5.1.4:110228:~:110228 ::~: ::~: ::~: 
+VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 3.1.8:61349:~ 3.2.12:68302:~ 4.0.12:72916:~:72916 4.1.22:80657:~:80657 4.2.18:88780:~:88780 4.3.30:101610:~:101610 5.0.24:108355:~:108355 $VBOX_VERSION:$VBOX_PACKAGE_NO:$VBOX_SEPARATOR:$VBOX_EXTENSION_NO"
 # this is just for cosmetic output of supported versions
 VBOX_VERSIONS=$( echo $VBOX_PREVIOUS | grep -Eo '[0-9]\.[0-9]\.[0-9]' )
 VBOX_VERSIONS=$( echo $VBOX_VERSIONS ) # dump the line breaks
@@ -1359,31 +1360,31 @@ vm_main_selector()
 	echo "${S}For most new or average users, ${C}VirtualBox${S} is a simple, clean install,"
 	echo "and you'll have your vbox up and running almost immediately."
 	echo $LINE
-	echo "${C}Vmware${S} options are basic, and only support vmware player."
+	#echo "${C}Vmware${S} options are basic, and only support vmware player."
 
-	echo $LINE
-	echo "${S}For convenience, this top level menu also includes the options to"
-	echo "rebuild vmware/vbox kernel modules if that's all you need to do."
-	echo $LINE
+	#echo $LINE
+	#echo "${S}For convenience, this top level menu also includes the options to"
+	#echo "rebuild vmware/vbox kernel modules if that's all you need to do."
+	#echo $LINE
 	echo "${C}1${S} - ${C}virtualbox-options${S} Downloads, installs, rebuild kernel module, ${C}vbox tools${S}, for"
 	echo "    both ${C}virtualbox non-ose${S} and ${C}virtualbox-ose${S}. Current: ${C}non-ose $VBOX_VERSION${S}."
-	echo "${C}2${S} - ${C}vmware-options${S} Downloads, installs, rebuild kernel module, and a few other things."
+	# echo "${C}2${S} - ${C}vmware-options${S} Downloads, installs, rebuild kernel module, and a few other things."
 
 	echo $LINE
 
-	echo "${C}3${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules."
+	echo "${C}2${S} - ${C}build-vbox-module-ose${S} Installs vbox OSE module, updates modules."
 	echo "    ${M}NOTE: System must be fully dist-upgraded for this to work right before you run this!"
-	echo "${C}4${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
-	echo "${C}5${S} - ${C}build-vmplayer-module${S} Rebuilds vmplayer kernel module. Requires vmplayer v. 2.5.x or greater."
+	echo "${C}3${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
+	# echo "${C}5${S} - ${C}build-vmplayer-module${S} Rebuilds vmplayer kernel module. Requires vmplayer v. 2.5.x or greater."
 
 	echo $LINE
-	echo "${C}6${S} - ${C}$quitContinue${S}"
+	echo "${C}4${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
-
-	options="virtualbox-options vmware-options build-vbox-module-ose build-vbox-module-non-ose build-vmplayer-module $quitContinue"
+	# options="virtualbox-options vmware-options build-vbox-module-ose build-vbox-module-non-ose build-vmplayer-module $quitContinue"
+	options="virtualbox-options build-vbox-module-ose build-vbox-module-non-ose $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1457,27 +1458,29 @@ vbox_main_selector()
 	echo "${S}Note: ${C}Vbox-non-ose versions 4${S} or newer will also install ${C}VirtualBox Extension Pack"
 	echo "Also, as of ${C}4.1.6${S}, there is no ${C}Lenny${S} support, so I have removed that option."
 	echo $LINE
-	echo "${C}3${S} - ${C}install-vbox-non-ose-jessie${S} Installs the ${C}Debian 8 Jessie${S} vbox deb."
+	echo "${C}3${S} - ${C}install-vbox-non-ose-stretch${S} Installs the ${C}Debian 9 Stretch${S} vbox deb."
 	echo "    Module is built automatically."
-	echo "${C}4${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy${S} vbox deb."
+	echo "${C}4${S} - ${C}install-vbox-non-ose-jessie${S} Installs the ${C}Debian 8 Jessie${S} vbox deb."
+	echo "    Module is built automatically."
+	echo "${C}5${S} - ${C}install-vbox-non-ose-wheezy${S} Installs the ${C}Debian 7 Wheezy${S} vbox deb."
 	echo "    Module is built automatically (${M}vbox-non-ose 1.6.6 or higher only${S})."
-	echo "${C}5${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
+	echo "${C}6${S} - ${C}build-vbox-module-non-ose${S} Will rebuild existing virtualbox non ose kernel module."
 	echo $LINE
-	echo "${C}6${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
+	echo "${C}7${S} - ${C}install-vbox-addons${S} Downloads vbox guest additions iso. Helps with driver installation,"
 	echo "    For both ose and non-ose. Highly recommended. Will download the version (${C}>1.6.0${S})"
 	echo "    for your currently installed virtualbox version: ${C}$vboxInstalled"
 
 	echo $LINE
-	echo "${C}7${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
+	echo "${C}8${S} - ${C}uninstall-vbox${S} Removes all currently installed ${C}VirtualBox${S} components."
 
-	echo "${C}8${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
-	echo "${C}9${S} - ${C}$quitContinue${S}"
+	echo "${C}9${S} - ${C}return-to-main-menu${S} Return to the main ${C}$SCRIPT_NAME${S} selector menu (${C}vmware${S} or ${C}vbox${S})"
+	echo "${C}10${S} - ${C}$quitContinue${S}"
 
 	echo $LINE
 	echo -e $SLE
 	echo $LINE
 
-	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-jessie install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
+	options="install-vbox-ose build-vbox-module-ose install-vbox-non-ose-stretch install-vbox-non-ose-jessie install-vbox-non-ose-wheezy build-vbox-module-non-ose install-vbox-addons uninstall-vbox return-to-main-menu $quitContinue"
 	select opt in $options
 	do
 		case $opt in
@@ -1487,6 +1490,10 @@ vbox_main_selector()
 				;;
 			build-vbox-module-ose)
 				install_vbox_module ose
+				repeat='true'
+				;;
+			install-vbox-non-ose-stretch)
+				install_vbox 'non-ose' 'stretch'
 				repeat='true'
 				;;
 			install-vbox-non-ose-jessie)
