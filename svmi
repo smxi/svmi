@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.70
-####  Date: 2017-03-08
+####  version: 2.8.71
+####  Date: 2017-06-29
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2017
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -730,15 +730,19 @@ basic_startup_tests()
 	local isWheezy=$( grep -Eis '^(wheezy|7\.)' <<< "$edvContent" )
 	local isJessie=$( grep -Eis '^(jessie|8\.)' <<< "$edvContent" )
 	local isStretch=$( grep -Eis '^(stretch|9\.)' <<< "$edvContent" )
-	
+	local isBuster=$( grep -Eis '^(buster|10\.)' <<< "$edvContent" )
+
 	# first tests sources
-	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie)' )
-	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(stretch|testing)' )
-	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | grep -Eicw '(sid|unstable)' )
-	
+	local isStable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
+	grep -Eicw '(stable|wheezy|squeeze|lenny|etch|jessie|stretch)' )
+	local isTesting=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
+	grep -Eicw '(buster|testing)' )
+	local isUnstable=$( grep -Esiw '^[[:space:]]*deb' <<< "$easContent" | grep -Eiv "$NON_DEBIAN_PATTERN" | \
+	grep -Eicw '(sid|unstable)' )
+
 	# then test conf for default version
-	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie)"' <<< "$eaaContent" )
-	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|stretch)"' <<< "$eaaContent" )
+	local isStableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(stable|etch|lenny|squeeze|wheezy|jessie|stretch)"' <<< "$eaaContent" )
+	local isTestingDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(testing|buster)"' <<< "$eaaContent" )
 	local isUnstableDefault=$( grep -Esi 'APT::Default-Release[[:space:]]"(sid|unstable)"' <<< "$eaaContent" )
 	
 	### basic execute requirements
@@ -766,7 +770,8 @@ basic_startup_tests()
 	fi
 
 	# set system type. This test will never be perfect, but it's a good approximation
-	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isSqueeze" -o -n "$isWheezy"  -o -n "$isJessie" -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
+	if [ -n "$isEtch" -o -n "$isLenny" -o -n "$isSqueeze" -o -n "$isWheezy" -o -n "$isJessie"  -o -n "$isStretch" \
+	     -o -n "$isStableDefault" ] || [ "$isStable" -gt 0 -a "$isUnstable" -eq 0  -a "$isTesting" -eq 0 ];then
 		if [ -n "$isEtch" ];then
 			FG_DISTRIB_CODENAME='etch'
 			SYSTEM_CODENAME='etch'
@@ -782,11 +787,14 @@ basic_startup_tests()
 		elif [ -n "$isJessie" ];then
 			FG_DISTRIB_CODENAME='jessie' # note: 'stable' breaks the installer
 			SYSTEM_CODENAME='jessie'
+		elif [ -n "$isStretch" ];then
+			FG_DISTRIB_CODENAME='stretch' # note: 'stable' breaks the installer
+			SYSTEM_CODENAME='stretch'
 		else
 			FG_DISTRIB_CODENAME='stable'
 			SYSTEM_CODENAME='stable'
 		fi
-	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isStretch" -o "$isTesting" -gt 0 ];then
+	elif [ "$isUnstable" -eq 0 -o -n "$isTestingDefault" ] && [ -n "$isBuster" -o "$isTesting" -gt 0 ];then
 		SYSTEM_BASE='testing'
 	else
 		SYSTEM_BASE='sid'
