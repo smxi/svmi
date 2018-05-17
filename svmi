@@ -2,8 +2,8 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.73
-####  Date: 2018-01-16
+####  version: 2.8.74
+####  Date: 2018-05-16
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2018
 ####  This program is free software; you can redistribute it and/or modify it under
@@ -224,9 +224,9 @@ esac
 
 APT_VBOX_VERSION_NU=''
 VBOX_INSTALL_PATH="${SCRIPT_WORKING_DIR}/vbox"
-VBOX_EXTENSION_NO='119785'
-VBOX_PACKAGE_NO='119785'
-VBOX_VERSION='5.2.4'
+VBOX_EXTENSION_NO='122591'
+VBOX_PACKAGE_NO='122591'
+VBOX_VERSION='5.2.12'
 VBOX_SEPARATOR='~' # note random changes in path components...  5.1.26-117224
 # 4.3.18-96516 4.3.22-98236 4.3.26-98988 - 5.1.10-112026 5.1.16-113841
 # 4.3.6-91406 4.3.8-92456 4.3.10-93012 4.3.12-93733 4.3.14-95030  4.3.16-95972
@@ -248,6 +248,7 @@ VBOX_SEPARATOR='~' # note random changes in path components...  5.1.26-117224
 # http://.../3.1.2/virtualbox-3.1_3.1.2-56127_Debian_lenny_amd64.deb
 # http://.../3.1.0/virtualbox-3.1_3.1.0-55467_Debian_lenny_i386.deb
 # http://.../3.0.12/virtualbox-3.0_3.0.12-54655_Debian_lenny_i386.deb
+# https://.../5.2.12/virtualbox-5.2_5.2.12-122591~Debian~wheezy_amd64.deb
 ## previous versions
 # 1.5.0:24069 1.5.2:25433 1.5.4:27034 1.5.6:28266 1.6.0:30421 1.6.2:31466 1.6.4:33808
 # 2.0.0:36011 2.0.2:36488 2.0.4:38406 2.0.6:39765 2.1.0:41146 2.1.2:41885 2.2.0:45846
@@ -268,7 +269,7 @@ VBOX_SEPARATOR='~' # note random changes in path components...  5.1.26-117224
 # 5.0.6:103037:~:103037 5.0.10:104061:~:104061 5.0.12:104815:~:104815 5.0.14:105127:~:105127 
 # 5.0.20:106931:~:106931 5.0.24:108355:~:108355 5.1.4:110228:~:110228 5.1.10:112026:~:112026  
 # 5.1.16:113841:~:113841 5.1.26:117224:~:117224 5.2.2:119230:~:119230 5.2.4:119785:~:119785 
-::~: ::~: ::~: ::~: ::~: ::~:  ::~: ::~: ::~: ::~: ::~: ::~: 
+# 5.2.12:122591:~:122591 ::~: ::~: ::~: ::~: ::~:  ::~: ::~: ::~: ::~: ::~: ::~: 
 VBOX_PREVIOUS="1.6.6:35336:_ 2.0.6:39765:_ 2.1.4:42893:_ 2.2.4:47978:_ 3.0.12:54655:_ 
 3.1.8:61349:~ 3.2.12:68302:~ 4.0.12:72916:~:72916 4.1.22:80657:~:80657 4.2.18:88780:~:88780 
 4.3.30:101610:~:101610 5.0.24:108355:~:108355 5.1.26:117224:~:117224 
@@ -935,7 +936,7 @@ uninstall_script()
 check_install_tools()
 {
 	eval $LOGPS
-	local gccVersion=$( grep -Eio 'gcc[[:space:]]*version[[:space:]]*[4-6]\.[0-9]{1,2}' /proc/version | grep -Eo '[4-6]\.[0-9]{1,2}' )
+	local gccVersion=$( grep -Eio 'gcc[[:space:]]*version[[:space:]]*[4-9]\.[0-9]{1,2}' /proc/version | grep -Eo '[4-9]\.[0-9]{1,2}' )
 	# as of gcc-5, gcc and g++ are without decimal
 	if [ -n "$gccVersion" -a -n "$( grep -E '^[5-9]' <<< $gccVersion)" ];then
 		gccVersion=$(grep -Eo '^[5-9]' <<< $gccVersion )
