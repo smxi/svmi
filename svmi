@@ -2024,7 +2024,7 @@ install_vbox()
 			toInstall='adduser'
 			if [ -n "$( grep -E '^[2-4]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqtcore4 libqtgui4"
-			elif [ -n "$( grep -E '^[2-4]\.' <<< $VBOX_VERSION )" ];then
+			elif [ -n "$( grep -E '^[5-9]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqt5core5a libpng12 libssl1.0.0 libvpx1"
 			fi
 		else
