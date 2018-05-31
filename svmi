@@ -2025,7 +2025,7 @@ install_vbox()
 			if [ -n "$( grep -E '^[2-4]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqtcore4 libqtgui4"
 			elif [ -n "$( grep -E '^[5-9]\.' <<< $VBOX_VERSION )" ];then
-				toInstall="$toInstall libqt5core5a libvpx1"
+				toInstall="$toInstall libqt5core5a"
 			fi
 		else
 			toInstall=''
