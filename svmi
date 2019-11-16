@@ -2,7 +2,7 @@
 ########################################################################
 ####  Script Name: system virtual machine installer: svmi
 ####  Only use for Debian Sid, Testing and Stable, no support for any other distro
-####  version: 2.8.78
+####  version: 2.8.79
 ####  Date: 2019-11-15
 ########################################################################
 ####  Copyright (C) Harald Hope 2007-2018
@@ -2037,8 +2037,10 @@ install_vbox()
 			toInstall='adduser'
 			if [ -n "$( grep -E '^[2-4]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqtcore4 libqtgui4"
-			elif [ -n "$( grep -E '^[5-9]\.' <<< $VBOX_VERSION )" ];then
+			elif [ -n "$( grep -E '^[5]\.' <<< $VBOX_VERSION )" ];then
 				toInstall="$toInstall libqt5core5a libcurl3"
+			elif [ -n "$( grep -E '^[6-9]\.' <<< $VBOX_VERSION )" ];then
+				toInstall="$toInstall libqt5core5a libcurl4"
 			fi
 		else
 			toInstall=''
