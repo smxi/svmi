@@ -1,4 +1,5 @@
-This tool is not being maintained actively. 
+This tool is not being maintained actively. the tool still works however, and 
+has some utility, albeit limited scope.
 
 https://codeberg.org/smxi/svmi
 
